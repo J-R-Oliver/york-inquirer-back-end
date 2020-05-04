@@ -1,11 +1,11 @@
 exports.up = knex => {
   return knex.schema.createTable('articles', articles => {
     articles.increments('article_id').primary();
+    articles.integer('topic_id').references('topics.topic_id');
+    articles.integer('user_id').references('users.user_id');
     articles.string('title').unique().notNullable();
     articles.string('body');
-    articles.integer('vote').defaultTo(0);
-    articles.string('topic').references('topics.slug');
-    articles.integer('author').references('users.user_id');
+    articles.integer('votes').notNullable().defaultTo(0);
     articles.timestamps(false, true); // ([useTimestamps], [defaultToNow])
   });
 };

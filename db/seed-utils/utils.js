@@ -5,3 +5,9 @@ exports.formatUsers = usersArr => {
     return { ...userNoName, first_name, last_name };
   });
 };
+
+exports.createRefObj = (objArr, keyOne, keyTwo) => {
+  return objArr.reduce((acc, obj) => {
+    return { ...acc, [obj[keyOne]]: obj[keyTwo] };
+  }, {});
+};

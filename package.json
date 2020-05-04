@@ -5,6 +5,9 @@
   "main": "index.js",
   "scripts": {
     "create-dbs": "psql -f ./db/setup.sql",
+    "create-db-migration": "knex migrate:make",
+    "migrate-db-latest": "knex migrate:latest",
+    "migrate-db-rollback": "knex migrate:rollback",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

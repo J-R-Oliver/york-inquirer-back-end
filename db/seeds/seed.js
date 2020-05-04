@@ -1,5 +1,13 @@
-const { topics } = require('../data/index.js');
+const { topics, users } = require('../data/index.js');
+const { formatUsers } = require('../seed-utils/utils');
+
+const formattedUsers = formatUsers(users);
 
 exports.seed = knex => {
-  return knex('topics').insert(topics);
+  const promiseArr = [
+    knex('topics').insert(topics),
+    knex('users').insert(formattedUsers)
+  ];
+
+  return Promise.all(promiseArr);
 };

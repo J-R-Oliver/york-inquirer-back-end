@@ -4,7 +4,7 @@ exports.up = knex => {
     articles.integer('topic_id').references('topics.topic_id');
     articles.integer('user_id').references('users.user_id');
     articles.string('title').unique().notNullable();
-    articles.string('body');
+    articles.string('body', 10000);
     articles.integer('votes').notNullable().defaultTo(0);
     articles.timestamps(false, true); // ([useTimestamps], [defaultToNow])
   });

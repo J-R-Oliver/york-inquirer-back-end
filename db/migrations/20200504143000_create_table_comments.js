@@ -3,7 +3,7 @@ exports.up = knex => {
     comments.increments('comment_id').primary();
     comments.integer('user_id').references('users.user_id');
     comments.integer('article_id').references('articles.article_id');
-    comments.string('body').notNullable();
+    comments.string('body', 500).notNullable();
     comments.integer('votes').notNullable().defaultTo(0);
     comments.timestamps(false, true); // ([useTimestamps], [defaultToNow])
   });

@@ -9,12 +9,17 @@ const {
 const formattedUsers = formatUsers(users);
 
 exports.seed = knex => {
-  const topicsUsersPromiseArr = [
-    knex('topics').insert(topics).returning('*'),
-    knex('users').insert(formattedUsers).returning('*')
-  ];
+  return knex.migrate
+    .rollback()
+    .then(() => knex.migrate.latest())
+    .then(() => {
+      const topicsUsersPromiseArr = [
+        knex('topics').insert(topics).returning('*'),
+        knex('users').insert(formattedUsers).returning('*')
+      ];
 
-  return Promise.all(topicsUsersPromiseArr)
+      return Promise.all(topicsUsersPromiseArr);
+    })
     .then(([topicsResult, usersResult]) => {
       const topicsRefObj = createRefObj(topicsResult, 'slug', 'topic_id');
       const usersRefObj = createRefObj(usersResult, 'username', 'user_id');

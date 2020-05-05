@@ -1,28 +1,46 @@
-const { topics, users, articles } = require('../data/index.js');
+const { topics, users, articles, comments } = require('../data/index.js');
 const {
   formatUsers,
   createRefObj,
-  formatArticles
+  formatArticles,
+  formatComments
 } = require('../seed-utils/utils');
 
 const formattedUsers = formatUsers(users);
 
 exports.seed = knex => {
-  const promiseArr = [
+  const topicsUsersPromiseArr = [
     knex('topics').insert(topics).returning('*'),
     knex('users').insert(formattedUsers).returning('*')
   ];
 
-  return Promise.all(promiseArr).then(([topicsResult, usersResult]) => {
-    const topicsRefObj = createRefObj(topicsResult, 'slug', 'topic_id');
-    const usersRefObj = createRefObj(usersResult, 'username', 'user_id');
+  return Promise.all(topicsUsersPromiseArr)
+    .then(([topicsResult, usersResult]) => {
+      const topicsRefObj = createRefObj(topicsResult, 'slug', 'topic_id');
+      const usersRefObj = createRefObj(usersResult, 'username', 'user_id');
 
-    const formattedArticles = formatArticles(
-      articles,
-      topicsRefObj,
-      usersRefObj
-    );
+      const formattedArticles = formatArticles(
+        articles,
+        topicsRefObj,
+        usersRefObj
+      );
 
-    return knex('articles').insert(formattedArticles).returning('*');
-  });
+      const articlesUserRefPromiseArr = [
+        knex('articles').insert(formattedArticles).returning('*'),
+        usersRefObj
+      ];
+
+      return Promise.all(articlesUserRefPromiseArr);
+    })
+    .then(([articlesResult, usersRefObj]) => {
+      const articleRefObj = createRefObj(articlesResult, 'title', 'article_id');
+
+      const formattedComments = formatComments(
+        comments,
+        articleRefObj,
+        usersRefObj
+      );
+
+      return knex('comments').insert(formattedComments);
+    });
 };

@@ -1,7 +1,8 @@
 const {
   formatUsers,
   createRefObj,
-  formatArticles
+  formatArticles,
+  formatComments
 } = require('../db/seed-utils/utils');
 
 describe('formatUsers', () => {
@@ -319,10 +320,10 @@ describe('formatArticles', () => {
       }
     ];
 
-    const topicRefObj = { coding: 1, football: 2, cooking: 3 };
-    const userRefObj = { jessjelly: 6, happyamy2016: 3, grumpy19: 2 };
+    const topicsRefObj = { coding: 1, football: 2, cooking: 3 };
+    const usersRefObj = { jessjelly: 6, happyamy2016: 3, grumpy19: 2 };
 
-    expect(formatArticles(input, topicRefObj, userRefObj)).toStrictEqual(
+    expect(formatArticles(input, topicsRefObj, usersRefObj)).toStrictEqual(
       expected
     );
   });
@@ -371,6 +372,192 @@ describe('formatArticles', () => {
     const userRefObj = { jessjelly: 6, happyamy2016: 3, grumpy19: 2 };
 
     formatArticles(input, topicRefObj, userRefObj);
+    expect(input).toStrictEqual(inputControl);
+  });
+});
+
+describe('formatComments', () => {
+  it('should return an array', () => {
+    expect(formatComments([])).toBeInstanceOf(Array);
+  });
+
+  it('should convert JavaScript Unix Epoch into PosgtreSQL timestamp', () => {
+    const input = [
+      {
+        body:
+          'Itaque quisquam est similique et est perspiciatis reprehenderit voluptatem autem. Voluptatem accusantium eius error adipisci quibusdam doloribus.',
+        belongs_to:
+          'The People Tracking Every Touch, Pass And Tackle in the World Cup',
+        created_by: 'tickle122',
+        votes: -1,
+        created_at: 1468087638932
+      }
+    ];
+
+    const articleRefObj = {
+      'The People Tracking Every Touch, Pass And Tackle in the World Cup': 18
+    };
+    const userRefObj = { tickle122: 1 };
+
+    const expectedDate = new Date(1468087638932);
+
+    expect(formatComments(input, articleRefObj, userRefObj)).toHaveProperty(
+      [0, 'created_at'],
+      expectedDate
+    );
+    expect(formatComments(input, articleRefObj, userRefObj)).toHaveProperty(
+      [0, 'updated_at'],
+      expectedDate
+    );
+  });
+
+  it('should work for an array of one object', () => {
+    const input = [
+      {
+        body:
+          'Itaque quisquam est similique et est perspiciatis reprehenderit voluptatem autem. Voluptatem accusantium eius error adipisci quibusdam doloribus.',
+        belongs_to:
+          'The People Tracking Every Touch, Pass And Tackle in the World Cup',
+        created_by: 'tickle122',
+        votes: -1,
+        created_at: 1468087638932
+      }
+    ];
+    const expected = [
+      {
+        body:
+          'Itaque quisquam est similique et est perspiciatis reprehenderit voluptatem autem. Voluptatem accusantium eius error adipisci quibusdam doloribus.',
+        article_id: 18,
+        user_id: 1,
+        votes: -1,
+        created_at: new Date(1468087638932),
+        updated_at: new Date(1468087638932)
+      }
+    ];
+
+    const articleRefObj = {
+      'The People Tracking Every Touch, Pass And Tackle in the World Cup': 18
+    };
+    const userRefObj = { tickle122: 1 };
+
+    expect(formatComments(input, articleRefObj, userRefObj)).toStrictEqual(
+      expected
+    );
+  });
+
+  it('should work for an array of more than one object', () => {
+    const input = [
+      {
+        body:
+          'Itaque quisquam est similique et est perspiciatis reprehenderit voluptatem autem. Voluptatem accusantium eius error adipisci quibusdam doloribus.',
+        belongs_to:
+          'The People Tracking Every Touch, Pass And Tackle in the World Cup',
+        created_by: 'tickle122',
+        votes: -1,
+        created_at: 1468087638932
+      },
+      {
+        body: 'Nobis consequatur animi. Ullam nobis quaerat voluptates veniam.',
+        belongs_to: 'Making sense of Redux',
+        created_by: 'grumpy19',
+        votes: 7,
+        created_at: 1478813209256
+      },
+      {
+        body:
+          'Qui sunt sit voluptas repellendus sed. Voluptatem et repellat fugiat. Rerum doloribus eveniet quidem vero aut sint officiis. Dolor facere et et architecto vero qui et perferendis dolorem. Magni quis ratione adipisci error assumenda ut. Id rerum eos facere sit nihil ipsam officia aspernatur odio.',
+        belongs_to: '22 Amazing open source React projects',
+        created_by: 'grumpy19',
+        votes: 3,
+        created_at: 1504183900263
+      }
+    ];
+    const expected = [
+      {
+        body:
+          'Itaque quisquam est similique et est perspiciatis reprehenderit voluptatem autem. Voluptatem accusantium eius error adipisci quibusdam doloribus.',
+        article_id: 18,
+        user_id: 1,
+        votes: -1,
+        created_at: new Date(1468087638932),
+        updated_at: new Date(1468087638932)
+      },
+      {
+        body: 'Nobis consequatur animi. Ullam nobis quaerat voluptates veniam.',
+        article_id: 4,
+        user_id: 2,
+        votes: 7,
+        created_at: new Date(1478813209256),
+        updated_at: new Date(1478813209256)
+      },
+      {
+        body:
+          'Qui sunt sit voluptas repellendus sed. Voluptatem et repellat fugiat. Rerum doloribus eveniet quidem vero aut sint officiis. Dolor facere et et architecto vero qui et perferendis dolorem. Magni quis ratione adipisci error assumenda ut. Id rerum eos facere sit nihil ipsam officia aspernatur odio.',
+        article_id: 3,
+        user_id: 2,
+        votes: 3,
+        created_at: new Date(1504183900263),
+        updated_at: new Date(1504183900263)
+      }
+    ];
+
+    const articlesRefObj = {
+      'The People Tracking Every Touch, Pass And Tackle in the World Cup': 18,
+      'Making sense of Redux': 4,
+      '22 Amazing open source React projects': 3
+    };
+    const usersRefObj = { tickle122: 1, grumpy19: 2, happyamy2016: 3 };
+
+    expect(formatComments(input, articlesRefObj, usersRefObj)).toStrictEqual(
+      expected
+    );
+  });
+
+  it('should not mutate input', () => {
+    const input = [
+      {
+        body:
+          'Itaque quisquam est similique et est perspiciatis reprehenderit voluptatem autem. Voluptatem accusantium eius error adipisci quibusdam doloribus.',
+        belongs_to:
+          'The People Tracking Every Touch, Pass And Tackle in the World Cup',
+        created_by: 'tickle122',
+        votes: -1,
+        created_at: 1468087638932
+      },
+      {
+        body: 'Nobis consequatur animi. Ullam nobis quaerat voluptates veniam.',
+        belongs_to: 'Making sense of Redux',
+        created_by: 'grumpy19',
+        votes: 7,
+        created_at: 1478813209256
+      }
+    ];
+
+    const inputControl = [
+      {
+        body:
+          'Itaque quisquam est similique et est perspiciatis reprehenderit voluptatem autem. Voluptatem accusantium eius error adipisci quibusdam doloribus.',
+        belongs_to:
+          'The People Tracking Every Touch, Pass And Tackle in the World Cup',
+        created_by: 'tickle122',
+        votes: -1,
+        created_at: 1468087638932
+      },
+      {
+        body: 'Nobis consequatur animi. Ullam nobis quaerat voluptates veniam.',
+        belongs_to: 'Making sense of Redux',
+        created_by: 'grumpy19',
+        votes: 7,
+        created_at: 1478813209256
+      }
+    ];
+    const articlesRefObj = {
+      'The People Tracking Every Touch, Pass And Tackle in the World Cup': 18,
+      'Making sense of Redux': 4
+    };
+    const usersRefObj = { tickle122: 1, grumpy19: 2 };
+
+    formatComments(input, articlesRefObj, usersRefObj);
     expect(input).toStrictEqual(inputControl);
   });
 });

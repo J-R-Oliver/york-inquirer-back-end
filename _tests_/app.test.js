@@ -238,7 +238,7 @@ describe('app', () => {
 
             const requestPromises = methods.map(method => {
               return request(app)
-                [method]('/api/articles/:article_id')
+                [method]('/api/articles/1')
                 .expect(405)
                 .then(({ body }) => {
                   expect(body.msg).toBe('Method Not Allowed');
@@ -246,6 +246,113 @@ describe('app', () => {
             });
 
             return Promise.all(requestPromises);
+          });
+        });
+
+        describe('/comments', () => {
+          describe('POST', () => {
+            it('status: 201 - responds with a comment object', () => {
+              return request(app)
+                .post('/api/articles/4/comments')
+                .send({
+                  username: 'butter_bridge',
+                  body: 'Test comment about cats'
+                })
+                .expect(201)
+                .then(({ body }) => {
+                  expect(body.comment).toHaveProperty('comment_id');
+                  expect(body.comment).toHaveProperty('author');
+                  expect(body.comment).toHaveProperty('body');
+                  expect(body.comment).toHaveProperty('votes');
+                  expect(body.comment).toHaveProperty('created_at');
+                  expect(body.comment).toHaveProperty('updated_at');
+                });
+            });
+
+            it('status: 201 - responds with the posted comment object', () => {
+              return request(app)
+                .post('/api/articles/3/comments')
+                .send({ username: 'icellusedkars', body: 'I love cats also' })
+                .expect(201)
+                .then(({ body }) => {
+                  expect(body.comment).toHaveProperty('comment_id', 19);
+                  expect(body.comment).toHaveProperty(
+                    'author',
+                    'icellusedkars'
+                  );
+                  expect(body.comment).toHaveProperty(
+                    'body',
+                    'I love cats also'
+                  );
+                });
+            });
+
+            it('status: 201 - responds with votes defaulted to 0', () => {
+              return request(app)
+                .post('/api/articles/2/comments')
+                .send({ username: 'rogersop', body: 'Also love cats' })
+                .expect(201)
+                .then(({ body }) => {
+                  expect(body.comment).toHaveProperty('votes', 0);
+                });
+            });
+
+            it('status: 201 - responds with created_at and update_at not set to null', () => {
+              return request(app)
+                .post('/api/articles/2/comments')
+                .send({ username: 'rogersop', body: 'Also love cats' })
+                .expect(201)
+                .then(({ body }) => {
+                  expect(body.comment.created_at).toBeTruthy;
+                  expect(body.comment.updated_at).toBeTruthy;
+                });
+            });
+
+            it('status: 400 - responds with Invalid Request Body when passed invalid body', () => {
+              return request(app)
+                .post('/api/articles/1/comments')
+                .send({ id: 'lurker', comment: 'I dont like cats' })
+                .expect(400)
+                .then(({ body }) => {
+                  expect(body.msg).toBe('Invalid Request Body');
+                });
+            });
+
+            it('status: 404 - responds with Username Not Found when passed an unknown username', () => {
+              return request(app)
+                .post('/api/articles/1/comments')
+                .send({ username: 'dog', body: 'I dont like cats' })
+                .expect(404)
+                .then(({ body }) => {
+                  expect(body.msg).toBe('Username Not Found');
+                });
+            });
+
+            it('status: 404 - responds with Article Not Found when id does not exist', () => {
+              return request(app)
+                .post('/api/articles/100/comments')
+                .send({ username: 'butter_bridge', body: 'We all love cats' })
+                .then(({ body }) => {
+                  expect(body.msg).toBe('Article Not Found');
+                });
+            });
+          });
+
+          describe('unsupported methods', () => {
+            it('status: 405 - responds with Method Not Allowed', () => {
+              const methods = ['patch', 'put', 'delete', 'options', 'trace'];
+
+              const requestPromises = methods.map(method => {
+                return request(app)
+                  [method]('/api/articles/1/comments')
+                  .expect(405)
+                  .then(({ body }) => {
+                    expect(body.msg).toBe('Method Not Allowed');
+                  });
+              });
+
+              return Promise.all(requestPromises);
+            });
           });
         });
       });

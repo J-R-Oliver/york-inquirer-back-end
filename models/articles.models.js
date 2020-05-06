@@ -17,5 +17,11 @@ exports.selectArticle = article_id => {
     .join('users', 'articles.user_id', '=', 'users.user_id')
     .leftJoin('comments', 'articles.article_id', '=', 'comments.article_id')
     .where('articles.article_id', article_id)
-    .groupBy('articles.article_id', 'users.username', 'topics.slug');
+    .groupBy('articles.article_id', 'users.username', 'topics.slug')
+    .then(article => {
+      if (article.length === 0) {
+        return Promise.reject({ status: 404, msg: 'Article Not Found' });
+      }
+      return article;
+    });
 };

@@ -80,58 +80,102 @@ describe('app', () => {
 
     describe('/articles', () => {
       describe('/:article_id', () => {
-        it('status: 200 - responds with an article object', () => {
-          return request(app)
-            .get('/api/articles/4')
-            .expect(200)
-            .then(({ body }) => {
-              expect(body.article).toHaveProperty('author');
-              expect(body.article).toHaveProperty('title');
-              expect(body.article).toHaveProperty('article_id');
-              expect(body.article).toHaveProperty('body');
-              expect(body.article).toHaveProperty('created_at');
-              expect(body.article).toHaveProperty('updated_at');
-              expect(body.article).toHaveProperty('votes');
-            });
+        describe('GET', () => {
+          it('status: 200 - responds with an article object', () => {
+            return request(app)
+              .get('/api/articles/4')
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.article).toHaveProperty('author');
+                expect(body.article).toHaveProperty('title');
+                expect(body.article).toHaveProperty('article_id');
+                expect(body.article).toHaveProperty('body');
+                expect(body.article).toHaveProperty('created_at');
+                expect(body.article).toHaveProperty('updated_at');
+                expect(body.article).toHaveProperty('votes');
+              });
+          });
+
+          it('status: 200 - responds with topic slug for article 3', () => {
+            return request(app)
+              .get('/api/articles/3')
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.article).toHaveProperty('topic', 'mitch');
+              });
+          });
+
+          it('status: 200 - responds with a comment_count for article 6', () => {
+            return request(app)
+              .get('/api/articles/6')
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.article).toHaveProperty('comment_count', '1');
+              });
+          });
+
+          it('status: 200 - responds with an article object with id 1', () => {
+            return request(app)
+              .get('/api/articles/1')
+              .expect(200)
+              .then(({ body }) => {
+                const expected = {
+                  author: 'butter_bridge',
+                  title: 'Living in the shadow of a great man',
+                  article_id: 1,
+                  body: 'I find this existence challenging',
+                  topic: 'mitch',
+                  created_at: '2018-11-15T12:21:54.171Z',
+                  updated_at: '2018-11-15T12:21:54.171Z',
+                  votes: 100,
+                  comment_count: '13'
+                };
+
+                expect(body.article).toStrictEqual(expected);
+              });
+          });
+
+          it('status: 404 - responds with Article Not Found when id does not exist', () => {
+            return request(app)
+              .get('/api/articles/100')
+              .expect(404)
+              .then(({ body }) => {
+                expect(body.msg).toBe('Article Not Found');
+              });
+          });
+
+          it('status: 400 - responds with Bad Request when :article_id is not an number', () => {
+            return request(app)
+              .get('/api/articles/cats')
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).toBe('Invalid Syntax For Article ID');
+              });
+          });
         });
 
-        it('status: 200 - responds with topic slug for article 3', () => {
-          return request(app)
-            .get('/api/articles/3')
-            .expect(200)
-            .then(({ body }) => {
-              expect(body.article).toHaveProperty('topic', 'mitch');
-            });
-        });
+        describe('unsupported methods', () => {
+          it('status: 405 - responds with Method Not Allowed', () => {
+            const methods = [
+              'post',
+              'put',
+              'delete',
+              'options',
+              'trace',
+              'patch'
+            ];
 
-        it('status: 200 - responds with a comment_count for article 6', () => {
-          return request(app)
-            .get('/api/articles/6')
-            .expect(200)
-            .then(({ body }) => {
-              expect(body.article).toHaveProperty('comment_count', '1');
+            const requestPromises = methods.map(method => {
+              return request(app)
+                [method]('/api/articles/:article_id')
+                .expect(405)
+                .then(({ body }) => {
+                  expect(body.msg).toBe('Method Not Allowed');
+                });
             });
-        });
 
-        it('status: 200 - responds with an article object with id 1', () => {
-          return request(app)
-            .get('/api/articles/1')
-            .expect(200)
-            .then(({ body }) => {
-              const expected = {
-                author: 'butter_bridge',
-                title: 'Living in the shadow of a great man',
-                article_id: 1,
-                body: 'I find this existence challenging',
-                topic: 'mitch',
-                created_at: '2018-11-15T12:21:54.171Z',
-                updated_at: '2018-11-15T12:21:54.171Z',
-                votes: 100,
-                comment_count: '13'
-              };
-
-              expect(body.article).toStrictEqual(expected);
-            });
+            return Promise.all(requestPromises);
+          });
         });
       });
     });

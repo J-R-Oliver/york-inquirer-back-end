@@ -3,7 +3,10 @@ const {
   getArticle,
   patchArticle
 } = require('../controllers/articles.controllers');
-const { postComment } = require('../controllers/comments.controllers');
+const {
+  postComment,
+  getComments
+} = require('../controllers/comments.controllers');
 const { usMethodHandler } = require('../controllers/error.controllers');
 
 articlesRouter
@@ -15,6 +18,7 @@ articlesRouter
 articlesRouter
   .route('/:article_id/comments')
   .post(postComment)
+  .get(getComments)
   .all(usMethodHandler);
 
 module.exports = articlesRouter;

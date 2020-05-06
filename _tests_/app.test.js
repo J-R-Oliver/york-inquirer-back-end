@@ -250,6 +250,110 @@ describe('app', () => {
         });
 
         describe('/comments', () => {
+          describe('GET', () => {
+            it('status: 200 - responds with array of comments', () => {
+              return request(app)
+                .get('/api/articles/1/comments')
+                .expect(200)
+                .then(({ body }) => {
+                  expect(body.comments).toBeInstanceOf(Array);
+                  expect(body.comments).toHaveLength(13);
+                });
+            });
+
+            it('status: 200 - responds with comment_id, author, body, votes, created_at and updated_at for each comment', () => {
+              return request(app)
+                .get('/api/articles/1/comments')
+                .expect(200)
+                .then(({ body }) => {
+                  body.comments.forEach(comment => {
+                    expect(comment).toHaveProperty('comment_id');
+                    expect(comment).toHaveProperty('author');
+                    expect(comment).toHaveProperty('body');
+                    expect(comment).toHaveProperty('votes');
+                    expect(comment).toHaveProperty('created_at');
+                    expect(comment).toHaveProperty('updated_at');
+                  });
+                });
+            });
+
+            it('status: 200 - responds with comments sorted by default, created_at and ascending', () => {
+              return request(app)
+                .get('/api/articles/1/comments')
+                .expect(200)
+                .then(({ body }) => {
+                  expect(body.comments).toBeSortedBy('created_at');
+                });
+            });
+
+            it('status: 200 - responds with oldest comment when sorted by default', () => {
+              const expected = {
+                comment_id: 18,
+                votes: 16,
+                created_at: '2000-11-26T12:36:03.389Z',
+                updated_at: '2000-11-26T12:36:03.389Z',
+                author: 'butter_bridge',
+                body: 'This morning, I showered for nine minutes.'
+              };
+
+              return request(app)
+                .get('/api/articles/1/comments')
+                .expect(200)
+                .then(({ body }) => {
+                  expect(body.comments[0]).toStrictEqual(expected);
+                });
+            });
+
+            it('status: 200 - responds with comments sorted by query', () => {
+              return request(app)
+                .get('/api/articles/1/comments?sort_by=votes')
+                .expect(200)
+                .then(({ body }) => {
+                  expect(body.comments).toBeSortedBy('votes');
+                });
+            });
+
+            it('status: 200 - responds with comments sorted in query order', () => {
+              return request(app)
+                .get('/api/articles/1/comments?order=desc')
+                .expect(200)
+                .then(({ body }) => {
+                  expect(body.comments).toBeSortedBy('created_at', {
+                    descending: true
+                  });
+                });
+            });
+
+            it('status: 200 - responds with comments sorted and ordered by query', () => {
+              return request(app)
+                .get('/api/articles/1/comments?order=desc&sort_by=updated_at')
+                .expect(200)
+                .then(({ body }) => {
+                  expect(body.comments).toBeSortedBy('updated_at', {
+                    descending: true
+                  });
+                });
+            });
+
+            it('status: 400 - responds with Invalid Request Query when passed an invalid sort by query', () => {
+              return request(app)
+                .get('/api/articles/1/comments?sort_by=cats')
+                .expect(400)
+                .then(({ body }) => {
+                  expect(body.msg).toBe('Invalid Request Query');
+                });
+            });
+
+            it('status: 404 - responds with Article Not Found when id does not exist', () => {
+              return request(app)
+                .get('/api/articles/100/comments')
+                .expect(404)
+                .then(({ body }) => {
+                  expect(body.msg).toBe('Article Not Found');
+                });
+            });
+          });
+
           describe('POST', () => {
             it('status: 201 - responds with a comment object', () => {
               return request(app)

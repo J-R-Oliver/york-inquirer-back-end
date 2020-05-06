@@ -31,3 +31,26 @@ exports.insertComment = (article_id, username, body) => {
         ]);
     });
 };
+
+exports.selectComments = (article_id, sort_by, order) => {
+  const sortBy = sort_by || 'created_at';
+
+  return knex('comments')
+    .select(
+      'comments.comment_id',
+      'users.username AS author',
+      'comments.body',
+      'comments.votes',
+      'comments.created_at',
+      'comments.updated_at'
+    )
+    .join('users', 'comments.user_id', '=', 'users.user_id')
+    .where('comments.article_id', article_id)
+    .orderBy(sortBy, order)
+    .then(comments => {
+      if (comments.length === 0) {
+        return Promise.reject({ status: 404, msg: 'Article Not Found' });
+      }
+      return comments;
+    });
+};

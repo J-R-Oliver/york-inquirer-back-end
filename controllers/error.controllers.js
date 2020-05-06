@@ -14,7 +14,7 @@ exports.customErrorHandler = (err, req, res, next) => {
 
 exports.knexErrorHandler = (err, req, res, next) => {
   const errorCodes = {
-    '22P02': { status: 400, msg: 'Invalid Syntax For Article ID' }
+    '22P02': { status: 400, msg: 'Invalid Request' }
   };
 
   if (err.code in errorCodes) {

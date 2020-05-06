@@ -25,3 +25,22 @@ exports.selectArticle = article_id => {
       return article;
     });
 };
+
+exports.updateArticle = (article_id, inc_votes) => {
+  if (!inc_votes) {
+    return Promise.reject({ status: 400, msg: 'Invalid Request Body' });
+  }
+
+  return knex('articles')
+    .where('articles.article_id', article_id)
+    .update('votes', inc_votes)
+    .then(() => {
+      return exports.selectArticle(article_id);
+    })
+    .then(article => {
+      if (article.length === 0) {
+        return Promise.reject({ status: 404, msg: 'Article Not Found' });
+      }
+      return article;
+    });
+};

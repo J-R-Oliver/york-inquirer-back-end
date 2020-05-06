@@ -9,7 +9,7 @@ describe('app', () => {
 
   afterAll(() => knex.destroy());
 
-  it('status:404 - unsupported routes respond with Not Found', () => {
+  it('status:404 - responds with Not Found on unsupported routes', () => {
     return request(app)
       .get('/cats')
       .expect(404)
@@ -31,7 +31,7 @@ describe('app', () => {
             });
         });
 
-        it('status: 200 - each topic to have description and slug keys', () => {
+        it('status: 200 - responds with description and slug keys for each topic', () => {
           return request(app)
             .get('/api/topics')
             .expect(200)
@@ -43,7 +43,7 @@ describe('app', () => {
             });
         });
 
-        it('status: 200 - topics to come back sorted alphabetically by slug', () => {
+        it('status: 200 - responds with topics sorted alphabetically by slug', () => {
           return request(app)
             .get('/api/topics')
             .expect(200)
@@ -135,12 +135,12 @@ describe('app', () => {
               });
           });
 
-          it('status: 400 - responds with Invalid Syntax For Article ID when :article_id is not an number', () => {
+          it('status: 400 - responds with Invalid Request when :article_id is not an number', () => {
             return request(app)
               .get('/api/articles/cats')
               .expect(400)
               .then(({ body }) => {
-                expect(body.msg).toBe('Invalid Syntax For Article ID');
+                expect(body.msg).toBe('Invalid Request');
               });
           });
 
@@ -154,16 +154,75 @@ describe('app', () => {
           });
         });
 
+        describe('PATCH', () => {
+          it('status: 200 - responds with an article object', () => {
+            return request(app)
+              .patch('/api/articles/4')
+              .send({ inc_votes: 1 })
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.article).toHaveProperty('author');
+                expect(body.article).toHaveProperty('title');
+                expect(body.article).toHaveProperty('article_id');
+                expect(body.article).toHaveProperty('body');
+                expect(body.article).toHaveProperty('created_at');
+                expect(body.article).toHaveProperty('updated_at');
+                expect(body.article).toHaveProperty('votes');
+              });
+          });
+
+          it('status: 200 - responds with votes incremented by 66', () => {
+            return request(app)
+              .patch('/api/articles/3')
+              .send({ inc_votes: 66 })
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.article).toHaveProperty('votes', 66);
+              });
+          });
+
+          it('status: 200 - responds with votes decremented by 99', () => {
+            return request(app)
+              .patch('/api/articles/2')
+              .send({ inc_votes: -99 })
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.article).toHaveProperty('votes', -99);
+              });
+          });
+
+          it('status: 400 - responds with Invalid Request when inc_votes is not an number', () => {
+            return request(app)
+              .patch('/api/articles/1')
+              .send({ inc_votes: 'cats' })
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).toBe('Invalid Request');
+              });
+          });
+
+          it('status: 400 - responds with Invalid Request Body when passed invalid key', () => {
+            return request(app)
+              .patch('/api/articles/1')
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).toBe('Invalid Request Body');
+              });
+          });
+
+          it('status: 404 - responds with Article Not Found when id does not exist', () => {
+            return request(app)
+              .patch('/api/articles/100')
+              .send({ inc_votes: 1 })
+              .then(({ body }) => {
+                expect(body.msg).toBe('Article Not Found');
+              });
+          });
+        });
+
         describe('unsupported methods', () => {
           it('status: 405 - responds with Method Not Allowed', () => {
-            const methods = [
-              'post',
-              'put',
-              'delete',
-              'options',
-              'trace',
-              'patch'
-            ];
+            const methods = ['post', 'put', 'delete', 'options', 'trace'];
 
             const requestPromises = methods.map(method => {
               return request(app)

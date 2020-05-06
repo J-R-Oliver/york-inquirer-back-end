@@ -135,21 +135,21 @@ describe('app', () => {
               });
           });
 
+          it('status: 400 - responds with Invalid Syntax For Article ID when :article_id is not an number', () => {
+            return request(app)
+              .get('/api/articles/cats')
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).toBe('Invalid Syntax For Article ID');
+              });
+          });
+
           it('status: 404 - responds with Article Not Found when id does not exist', () => {
             return request(app)
               .get('/api/articles/100')
               .expect(404)
               .then(({ body }) => {
                 expect(body.msg).toBe('Article Not Found');
-              });
-          });
-
-          it('status: 400 - responds with Bad Request when :article_id is not an number', () => {
-            return request(app)
-              .get('/api/articles/cats')
-              .expect(400)
-              .then(({ body }) => {
-                expect(body.msg).toBe('Invalid Syntax For Article ID');
               });
           });
         });
@@ -168,6 +168,78 @@ describe('app', () => {
             const requestPromises = methods.map(method => {
               return request(app)
                 [method]('/api/articles/:article_id')
+                .expect(405)
+                .then(({ body }) => {
+                  expect(body.msg).toBe('Method Not Allowed');
+                });
+            });
+
+            return Promise.all(requestPromises);
+          });
+        });
+      });
+    });
+
+    describe('/users', () => {
+      describe('/:username', () => {
+        describe('GET', () => {
+          it('status: 200 - responds with an user object', () => {
+            return request(app)
+              .get('/api/users/butter_bridge')
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.user).toHaveProperty('username');
+                expect(body.user).toHaveProperty('avatar_url');
+              });
+          });
+
+          it('status: 200 - responds with first name and last name combined in name key', () => {
+            return request(app)
+              .get('/api/users/icellusedkars')
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.user).toHaveProperty('name', 'sam samson');
+              });
+          });
+
+          it('status: 200 - responds with user object with username of rogersop', () => {
+            return request(app)
+              .get('/api/users/rogersop')
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.user).toHaveProperty('username', 'rogersop');
+                expect(body.user).toHaveProperty(
+                  'avatar_url',
+                  'https://avatars2.githubusercontent.com/u/24394918?s=400&v=4'
+                );
+                expect(body.user).toHaveProperty('name', 'paul paulson');
+              });
+          });
+
+          it('status: 404 - responds with User Not Found when username does not exist', () => {
+            return request(app)
+              .get('/api/users/smurf66')
+              .expect(404)
+              .then(({ body }) => {
+                expect(body.msg).toBe('User Not Found');
+              });
+          });
+        });
+
+        describe('unsupported methods', () => {
+          it('status: 405 - responds with Method Not Allowed', () => {
+            const methods = [
+              'post',
+              'put',
+              'delete',
+              'options',
+              'trace',
+              'patch'
+            ];
+
+            const requestPromises = methods.map(method => {
+              return request(app)
+                [method]('/api/users/:username')
                 .expect(405)
                 .then(({ body }) => {
                   expect(body.msg).toBe('Method Not Allowed');

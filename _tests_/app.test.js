@@ -191,6 +191,18 @@ describe('app', () => {
               });
           });
 
+          it('status: 200 - responds with update_at to current time', () => {
+            return request(app)
+              .patch('/api/articles/1')
+              .send({ inc_votes: 10 })
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.article.updated_at).not.toBe(
+                  body.article.created_at
+                );
+              });
+          });
+
           it('status: 400 - responds with Invalid Request when inc_votes is not an number', () => {
             return request(app)
               .patch('/api/articles/1')

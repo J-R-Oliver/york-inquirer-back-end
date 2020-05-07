@@ -378,21 +378,21 @@ describe('app', () => {
 
           it('status: 200 - responds with votes incremented by 66', () => {
             return request(app)
-              .patch('/api/articles/3')
+              .patch('/api/articles/1')
               .send({ inc_votes: 66 })
               .expect(200)
               .then(({ body }) => {
-                expect(body.article).toHaveProperty('votes', 66);
+                expect(body.article).toHaveProperty('votes', 166);
               });
           });
 
-          it('status: 200 - responds with votes decremented by 99', () => {
+          it('status: 200 - responds with votes decremented by 101', () => {
             return request(app)
-              .patch('/api/articles/2')
-              .send({ inc_votes: -99 })
+              .patch('/api/articles/1')
+              .send({ inc_votes: -101 })
               .expect(200)
               .then(({ body }) => {
-                expect(body.article).toHaveProperty('votes', -99);
+                expect(body.article).toHaveProperty('votes', -1);
               });
           });
 

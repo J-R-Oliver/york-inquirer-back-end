@@ -33,7 +33,7 @@ exports.updateArticle = (article_id, inc_votes) => {
 
   return knex('articles')
     .where('articles.article_id', article_id)
-    .update('votes', inc_votes)
+    .increment('votes', inc_votes)
     .then(() => {
       return exports.selectArticle(article_id);
     })

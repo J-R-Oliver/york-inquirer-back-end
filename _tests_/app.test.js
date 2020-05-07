@@ -79,6 +79,211 @@ describe('app', () => {
     });
 
     describe('/articles', () => {
+      describe('GET', () => {
+        it('status: 200 - responds with an array of articles', () => {
+          return request(app)
+            .get('/api/articles')
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.articles).toBeInstanceOf(Array);
+              expect(body.articles).toHaveLength(12);
+            });
+        });
+
+        it('status: 200 - responds with an array of article objects', () => {
+          return request(app)
+            .get('/api/articles')
+            .expect(200)
+            .then(({ body }) => {
+              body.articles.forEach(article => {
+                expect(article).toHaveProperty('author');
+                expect(article).toHaveProperty('title');
+                expect(article).toHaveProperty('article_id');
+                expect(article).toHaveProperty('topic');
+                expect(article).toHaveProperty('created_at');
+                expect(article).toHaveProperty('updated_at');
+                expect(article).toHaveProperty('votes');
+                expect(article).toHaveProperty('comment_count');
+              });
+            });
+        });
+
+        it('status: 200 - responds with articles sorted by default, created_at and ascending', () => {
+          return request(app)
+            .get('/api/articles')
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.articles).toBeSortedBy('created_at');
+            });
+        });
+
+        it('status: 200 - responds with comment_count for each article', () => {
+          return request(app)
+            .get('/api/articles')
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.articles[11]).toHaveProperty('comment_count', '13');
+
+              body.articles.forEach(article => {
+                expect(article).toHaveProperty('comment_count');
+              });
+            });
+        });
+
+        it('status: 200 - responds with topic for each article', () => {
+          return request(app)
+            .get('/api/articles')
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.articles[7]).toHaveProperty('topic', 'cats');
+
+              body.articles.forEach(article => {
+                expect(article).toHaveProperty('topic');
+              });
+            });
+        });
+
+        it('status: 200 - responds with oldest article first when sorted by default', () => {
+          const expected = {
+            author: 'butter_bridge',
+            title: 'Moustache',
+            article_id: 12,
+            topic: 'mitch',
+            created_at: '1974-11-26T12:21:54.171Z',
+            updated_at: '1974-11-26T12:21:54.171Z',
+            votes: 0,
+            comment_count: '0'
+          };
+
+          return request(app)
+            .get('/api/articles')
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.articles[0]).toStrictEqual(expected);
+            });
+        });
+
+        it('status: 200 - responds with articles sorted by sort_by query', () => {
+          return request(app)
+            .get('/api/articles?sort_by=votes')
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.articles).toBeSortedBy('votes');
+            });
+        });
+
+        it('status: 200 - responds with articles ordered by order query', () => {
+          return request(app)
+            .get('/api/articles?order=desc')
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.articles).toBeSortedBy('created_at', {
+                descending: true
+              });
+            });
+        });
+
+        it('status: 200 - responds with articles whose author matches username query', () => {
+          return request(app)
+            .get('/api/articles?username=rogersop')
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.articles).toHaveLength(3);
+
+              body.articles.forEach(article => {
+                expect(article).toHaveProperty('author', 'rogersop');
+              });
+            });
+        });
+
+        it('status: 200 - responds with articles whose topic matches topic query', () => {
+          return request(app)
+            .get('/api/articles?topic=mitch')
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.articles).toHaveLength(11);
+
+              body.articles.forEach(article => {
+                expect(article).toHaveProperty('topic', 'mitch');
+              });
+            });
+        });
+
+        it('status: 200 - responds with articles who are sorted and ordered by query, and filtered by username and topic query', () => {
+          const expected = {
+            author: 'rogersop',
+            title: 'UNCOVERED: catspiracy to bring down democracy',
+            article_id: 5,
+            topic: 'cats',
+            created_at: '2002-11-19T12:21:54.171Z',
+            updated_at: '2002-11-19T12:21:54.171Z',
+            votes: 0,
+            comment_count: '2'
+          };
+
+          return request(app)
+            .get(
+              '/api/articles?sort_by=votes&order=desc&username=rogersop&topic=cats'
+            )
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.articles).toHaveLength(1);
+              expect(body.articles[0]).toStrictEqual(expected);
+            });
+        });
+
+        it('status: 400 - responds with Invalid Request Query when passed an invalid query', () => {
+          return request(app)
+            .get('/api/articles?cats=great')
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).toBe('Invalid Request Query');
+            });
+        });
+
+        it('status: 400 - responds with Invalid Request Query when passed an invalid query argument', () => {
+          return request(app)
+            .get('/api/articles?sort_by=cats')
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).toBe('Invalid Request Query');
+            });
+        });
+
+        it('status: 404 - responds with Articles Not Found when no articles match query', () => {
+          return request(app)
+            .get('/api/articles?topic=dog')
+            .expect(404)
+            .then(({ body }) => {
+              expect(body.msg).toBe('Articles Not Found');
+            });
+        });
+      });
+
+      describe('unsupported methods', () => {
+        it('status: 405 - responds with Method Not Allowed', () => {
+          const methods = [
+            'post',
+            'put',
+            'delete',
+            'options',
+            'trace',
+            'patch'
+          ];
+
+          const requestPromises = methods.map(method => {
+            return request(app)
+              [method]('/api/articles')
+              .expect(405)
+              .then(({ body }) => {
+                expect(body.msg).toBe('Method Not Allowed');
+              });
+          });
+
+          return Promise.all(requestPromises);
+        });
+      });
+
       describe('/:article_id', () => {
         describe('GET', () => {
           it('status: 200 - responds with an article object', () => {
@@ -286,7 +491,7 @@ describe('app', () => {
                 });
             });
 
-            it('status: 200 - responds with oldest comment when sorted by default', () => {
+            it('status: 200 - responds with oldest comment first when sorted by default', () => {
               const expected = {
                 comment_id: 18,
                 votes: 16,

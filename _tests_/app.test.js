@@ -745,6 +745,7 @@ describe('app', () => {
           it('status: 400 - responds with Invalid Request Body when passed invalid key', () => {
             return request(app)
               .patch('/api/comments/6')
+              .send({ cats: 6 })
               .expect(400)
               .then(({ body }) => {
                 expect(body.msg).toBe('Invalid Request Body');

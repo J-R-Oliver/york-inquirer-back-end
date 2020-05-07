@@ -439,7 +439,7 @@ describe('app', () => {
 
         describe('unsupported methods', () => {
           it('status: 405 - responds with Method Not Allowed', () => {
-            const methods = ['post', 'put', 'delete', 'options', 'trace'];
+            const methods = ['post', 'put', 'options', 'trace'];
 
             const requestPromises = methods.map(method => {
               return request(app)
@@ -755,6 +755,31 @@ describe('app', () => {
             return request(app)
               .patch('/api/comments/100')
               .send({ inc_votes: 1 })
+              .expect(404)
+              .then(({ body }) => {
+                expect(body.msg).toBe('Comment Not Found');
+              });
+          });
+        });
+
+        describe('DELETE', () => {
+          it('status: 204 - responds with no content', () => {
+            return request(app).del('/api/comments/1').expect(204);
+          });
+
+          it('status: 400 responds with Invalid Request when :comment_id is not an number', () => {
+            return request(app)
+              .del('/api/comments/cat')
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).toBe('Invalid Request');
+              });
+          });
+
+          it('status: 404 responds with Comment Not Found when id does not exist', () => {
+            return request(app)
+              .del('/api/comments/66')
+              .expect(404)
               .then(({ body }) => {
                 expect(body.msg).toBe('Comment Not Found');
               });
@@ -763,7 +788,7 @@ describe('app', () => {
 
         describe('unsupported methods', () => {
           it('status: 405 - responds with Method Not Allowed', () => {
-            const methods = ['get', 'put', 'delete', 'options', 'trace'];
+            const methods = ['get', 'put', 'options', 'trace'];
 
             const requestPromises = methods.map(method => {
               return request(app)

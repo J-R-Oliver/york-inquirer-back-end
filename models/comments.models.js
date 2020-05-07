@@ -84,4 +84,14 @@ exports.updateComment = (comment_id, inc_votes) => {
     });
 };
 
-// articles doesn't add ?
+exports.deleteComment = comment_id => {
+  return knex('comments')
+    .del()
+    .where('comments.comment_id', comment_id)
+    .then(affectedRows => {
+      if (affectedRows === 0) {
+        return Promise.reject({ status: 404, msg: 'Comment Not Found' });
+      }
+      return Promise.resolve();
+    });
+};

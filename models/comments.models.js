@@ -54,3 +54,34 @@ exports.selectComments = (article_id, sort_by, order) => {
       return comments;
     });
 };
+
+exports.updateComment = (comment_id, inc_votes) => {
+  if (!inc_votes) {
+    return Promise.reject({ status: 400, msg: 'Invalid Request Body' });
+  }
+
+  return knex('comments')
+    .where('comments.comment_id', comment_id)
+    .increment('votes', inc_votes)
+    .then(() => {
+      return knex('comments')
+        .select(
+          'comments.comment_id',
+          'users.username AS author',
+          'comments.body',
+          'comments.votes',
+          'comments.created_at',
+          'comments.updated_at'
+        )
+        .join('users', 'comments.user_id', '=', 'users.user_id')
+        .where('comments.comment_id', comment_id);
+    })
+    .then(comment => {
+      if (comment.length === 0) {
+        return Promise.reject({ status: 404, msg: 'Comment Not Found' });
+      }
+      return comment;
+    });
+};
+
+// articles doesn't add ?

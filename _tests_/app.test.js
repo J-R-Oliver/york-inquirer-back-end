@@ -667,6 +667,107 @@ describe('app', () => {
       });
     });
 
+    describe('/comments', () => {
+      describe('/:comment_id', () => {
+        describe('PATCH', () => {
+          it('status: 200 - responds with a comment object', () => {
+            return request(app)
+              .patch('/api/comments/4')
+              .send({ inc_votes: 1 })
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.comment).toHaveProperty('comment_id');
+                expect(body.comment).toHaveProperty('author');
+                expect(body.comment).toHaveProperty('body');
+                expect(body.comment).toHaveProperty('votes');
+                expect(body.comment).toHaveProperty('created_at');
+                expect(body.comment).toHaveProperty('updated_at');
+              });
+          });
+
+          it('status: 200 - responds with a comment object matching parameter id', () => {
+            return request(app)
+              .patch('/api/comments/1')
+              .send({ inc_votes: 1 })
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.comment).toHaveProperty('comment_id', 1);
+                expect(body.comment).toHaveProperty('author', 'butter_bridge');
+                expect(body.comment).toHaveProperty(
+                  'body',
+                  "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!"
+                );
+              });
+          });
+
+          it('status: 200 - responds with votes incremented by 6', () => {
+            return request(app)
+              .patch('/api/comments/2')
+              .send({ inc_votes: 6 })
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.comment).toHaveProperty('votes', 20);
+              });
+          });
+
+          it('status: 200 - responds with votes decremented by 9', () => {
+            return request(app)
+              .patch('/api/comments/3')
+              .send({ inc_votes: -9 })
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.comment).toHaveProperty('votes', 91);
+              });
+          });
+
+          it('status: 400 - responds with Invalid Request when inc_votes is not an number', () => {
+            return request(app)
+              .patch('/api/comments/5')
+              .send({ inc_votes: 'cats' })
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).toBe('Invalid Request');
+              });
+          });
+
+          it('status: 400 - responds with Invalid Request Body when passed invalid key', () => {
+            return request(app)
+              .patch('/api/comments/6')
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).toBe('Invalid Request Body');
+              });
+          });
+
+          it('status: 404 - responds with Comment Not Found when id does not exist', () => {
+            return request(app)
+              .patch('/api/comments/100')
+              .send({ inc_votes: 1 })
+              .then(({ body }) => {
+                expect(body.msg).toBe('Comment Not Found');
+              });
+          });
+        });
+
+        describe('unsupported methods', () => {
+          it('status: 405 - responds with Method Not Allowed', () => {
+            const methods = ['get', 'put', 'delete', 'options', 'trace'];
+
+            const requestPromises = methods.map(method => {
+              return request(app)
+                [method]('/api/comments/1')
+                .expect(405)
+                .then(({ body }) => {
+                  expect(body.msg).toBe('Method Not Allowed');
+                });
+            });
+
+            return Promise.all(requestPromises);
+          });
+        });
+      });
+    });
+
     describe('/users', () => {
       describe('/:username', () => {
         describe('GET', () => {

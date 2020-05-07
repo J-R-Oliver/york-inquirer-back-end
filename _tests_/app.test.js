@@ -720,6 +720,18 @@ describe('app', () => {
               });
           });
 
+          it('status: 200 - responds with update_at to current time', () => {
+            return request(app)
+              .patch('/api/comments/4')
+              .send({ inc_votes: 10 })
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.comment.updated_at).not.toBe(
+                  body.comment.created_at
+                );
+              });
+          });
+
           it('status: 400 - responds with Invalid Request when inc_votes is not an number', () => {
             return request(app)
               .patch('/api/comments/5')

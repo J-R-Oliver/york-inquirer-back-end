@@ -3,13 +3,14 @@ process.env.NODE_ENV = 'test';
 const request = require('supertest');
 const knex = require('../db/connection');
 const app = require('../app');
+const topicsModels = require('../models/topics.models');
 
 describe('app', () => {
   beforeEach(() => knex.seed.run());
 
   afterAll(() => knex.destroy());
 
-  it('status:404 - responds with Not Found on unsupported routes', () => {
+  it('status: 404 - responds with Not Found on unsupported routes', () => {
     return request(app)
       .get('/cats')
       .expect(404)

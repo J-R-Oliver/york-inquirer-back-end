@@ -1,7 +1,11 @@
 {
-  "extends": ["airbnb", "prettier", "plugin:jest/recommended", "plugin:jest-formatting/recommended", "plugin:node/recommended", "plugin:security/recommended", "plugin:promise/recommended"],
-  "plugins": ["prettier", "jest", "jest-formatting", "node", "security", "promise"],
+  "extends": ["airbnb", "prettier", "plugin:jest/recommended", "plugin:jest-formatting/recommended", "plugin:node/recommended", "plugin:security/recommended"],
+  "plugins": ["prettier", "jest", "jest-formatting", "node", "security"],
   "rules": {
-    "prettier/prettier": ["error"]
+    "prettier/prettier": ["error"],
+    "prefer-promise-reject-errors": "off",
+    "camelcase": "off",
+    "security/detect-object-injection": "off",
+    "node/no-unpublished-require": ["off"]
   }
 }

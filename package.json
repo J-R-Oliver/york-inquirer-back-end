@@ -1,6 +1,9 @@
 {
   "name": "the-york-inquirer",
   "version": "1.0.0",
+  "engines": {
+    "node": ">=10.0.0"
+  },
   "description": "A newspaper website allowing for user comments.",
   "main": "index.js",
   "scripts": {
@@ -9,7 +12,14 @@
     "migrate-db-latest": "knex migrate:latest",
     "migrate-db-rollback": "knex migrate:rollback",
     "seed-db": "knex seed:run",
+    "pretest": "eslint .",
     "test": "jest"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm test",
+      "pre-push": "npm test"
+    }
   },
   "repository": {
     "type": "git",
@@ -32,10 +42,10 @@
     "eslint-plugin-jsx-a11y": "^6.2.3",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^3.1.3",
-    "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-react": "^7.19.0",
     "eslint-plugin-react-hooks": "^2.5.0",
     "eslint-plugin-security": "^1.4.0",
+    "husky": "^4.2.5",
     "jest": "^25.5.4",
     "jest-sorted": "^1.0.6",
     "prettier": "^2.0.5",

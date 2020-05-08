@@ -3,7 +3,6 @@ process.env.NODE_ENV = 'test';
 const request = require('supertest');
 const knex = require('../db/connection');
 const app = require('../app');
-const topicsModels = require('../models/topics.models');
 
 describe('app', () => {
   beforeEach(() => knex.seed.run());
@@ -613,8 +612,8 @@ describe('app', () => {
                 .send({ username: 'rogersop', body: 'Also love cats' })
                 .expect(201)
                 .then(({ body }) => {
-                  expect(body.comment.created_at).toBeTruthy;
-                  expect(body.comment.updated_at).toBeTruthy;
+                  expect(body.comment.created_at).toBeTruthy();
+                  expect(body.comment.updated_at).toBeTruthy();
                 });
             });
 
@@ -765,6 +764,7 @@ describe('app', () => {
         });
 
         describe('DELETE', () => {
+          // eslint-disable-next-line jest/expect-expect
           it('status: 204 - responds with no content', () => {
             return request(app).del('/api/comments/1').expect(204);
           });

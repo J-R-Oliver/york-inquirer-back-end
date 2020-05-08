@@ -25,7 +25,9 @@ exports.knexErrorHandler = (err, req, res, next) => {
   } else next(err);
 };
 
+// eslint-disable-next-line no-unused-vars
 exports.internalErrorHandler = (err, req, res, next) => {
-  console.log('Unhandled error:', err);
+  // eslint-disable-next-line no-console
+  console.log('Unhandled', err);
   res.status(500).send({ msg: 'Internal Server Error' });
 };

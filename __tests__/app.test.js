@@ -9,16 +9,43 @@ describe('app', () => {
 
   afterAll(() => knex.destroy());
 
-  it('status: 404 - responds with Not Found on unsupported routes', () => {
-    return request(app)
-      .get('/cats')
-      .expect(404)
-      .then(({ body }) => {
-        expect(body.msg).toBe('Not Found');
-      });
+  describe('Unsupported routes', () => {
+    it('status: 404 - responds with Not Found on unsupported routes', () => {
+      return request(app)
+        .get('/cats')
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe('Not Found');
+        });
+    });
   });
 
   describe('/api', () => {
+    describe('unsupported methods', () => {
+      it('status: 405 - responds with Method Not Allowed', () => {
+        const methods = [
+          'get',
+          'post',
+          'put',
+          'delete',
+          'options',
+          'trace',
+          'patch'
+        ];
+
+        const requestPromises = methods.map(method => {
+          return request(app)
+            [method]('/api')
+            .expect(405)
+            .then(({ body }) => {
+              expect(body.msg).toBe('Method Not Allowed');
+            });
+        });
+
+        return Promise.all(requestPromises);
+      });
+    });
+
     describe('/topics', () => {
       describe('GET', () => {
         it('status: 200 - responds with array of topics', () => {
@@ -232,7 +259,7 @@ describe('app', () => {
             });
         });
 
-        it('status: 400 - responds with Invalid Request Query when passed an invalid query', () => {
+        it('status: 400 - responds with Invalid Request Query when passed an invalid query parameter', () => {
           return request(app)
             .get('/api/articles?cats=great')
             .expect(400)

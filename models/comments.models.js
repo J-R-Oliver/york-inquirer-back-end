@@ -23,7 +23,7 @@ exports.insertComment = (article_id, username, body) => {
         })
         .returning([
           'comment_id',
-          knex.raw(`'${username}' AS author`),
+          knex.raw('? AS author', [username]),
           'body',
           'votes',
           'created_at',

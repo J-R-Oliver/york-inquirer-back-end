@@ -11,7 +11,6 @@ FROM articles
 JOIN topics ON articles.topic_id = topics.topic_id
 JOIN users ON articles.user_id = users.user_id
 LEFT JOIN comments ON articles.article_id = comments.article_id
-WHERE users.username = 'rogersop'
-  AND topics.slug = 'mitch'
+WHERE topics.slug = 'paper'
 GROUP BY articles.article_id, users.username, topics.slug
-ORDER BY articles.created_at ASC;
+ORDER BY articles.created_at DESC;

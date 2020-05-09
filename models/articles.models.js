@@ -1,12 +1,6 @@
 const knex = require('../db/connection');
 
-exports.selectArticles = (sort_by, order, username, topic, invalidQueries) => {
-  if (Object.keys(invalidQueries).length) {
-    return Promise.reject({ status: 400, msg: 'Invalid Request Query' });
-  }
-
-  const sortBy = sort_by || 'created_at';
-
+exports.selectArticles = (sort_by, order, username, topic) => {
   return knex('articles')
     .select(
       'users.username AS author',
@@ -22,7 +16,7 @@ exports.selectArticles = (sort_by, order, username, topic, invalidQueries) => {
     .join('users', 'articles.user_id', '=', 'users.user_id')
     .leftJoin('comments', 'articles.article_id', '=', 'comments.article_id')
     .groupBy('articles.article_id', 'users.username', 'topics.slug')
-    .orderBy(sortBy, order)
+    .orderBy(sort_by, order)
     .modify(query => {
       if (username && topic) {
         query.where({ 'users.username': username, 'topics.slug': topic });
@@ -31,12 +25,6 @@ exports.selectArticles = (sort_by, order, username, topic, invalidQueries) => {
       } else if (topic) {
         query.where({ 'topics.slug': topic });
       }
-    })
-    .then(articles => {
-      if (articles.length === 0) {
-        return Promise.reject({ status: 404, msg: 'Articles Not Found' });
-      }
-      return articles;
     });
 };
 
@@ -67,10 +55,6 @@ exports.selectArticle = article_id => {
 };
 
 exports.updateArticle = (article_id, inc_votes) => {
-  if (!inc_votes) {
-    return Promise.reject({ status: 400, msg: 'Invalid Request Body' });
-  }
-
   return knex('articles')
     .where('articles.article_id', article_id)
     .increment('votes', inc_votes)

@@ -7,7 +7,7 @@ const {
 
 exports.getComments = (req, res, next) => {
   const { article_id } = req.params;
-  const { sort_by, order } = req.query;
+  const { sort_by = 'created_at', order = 'desc' } = req.query;
 
   selectComments(article_id, sort_by, order)
     .then(comments => {
@@ -39,7 +39,7 @@ exports.deleteComment = (req, res, next) => {
 
 exports.patchComment = (req, res, next) => {
   const { comment_id } = req.params;
-  const { inc_votes } = req.body;
+  const { inc_votes = 0 } = req.body;
 
   updateComment(comment_id, inc_votes)
     .then(([comment]) => {

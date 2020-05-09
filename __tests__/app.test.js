@@ -54,6 +54,14 @@ describe('app', () => {
             .expect(200)
             .then(({ body }) => {
               expect(body.articles).toBeInstanceOf(Array);
+            });
+        });
+
+        it('status: 200 - responds with all articles', () => {
+          return request(app)
+            .get('/api/articles')
+            .expect(200)
+            .then(({ body }) => {
               expect(body.articles).toHaveLength(12);
             });
         });
@@ -76,12 +84,14 @@ describe('app', () => {
             });
         });
 
-        it('status: 200 - responds with articles sorted by default, created_at and ascending', () => {
+        it('status: 200 - responds with articles sorted by default, created_at and descending', () => {
           return request(app)
             .get('/api/articles')
             .expect(200)
             .then(({ body }) => {
-              expect(body.articles).toBeSortedBy('created_at');
+              expect(body.articles).toBeSortedBy('created_at', {
+                descending: true
+              });
             });
         });
 
@@ -90,7 +100,7 @@ describe('app', () => {
             .get('/api/articles')
             .expect(200)
             .then(({ body }) => {
-              expect(body.articles[11]).toHaveProperty('comment_count', '13');
+              expect(body.articles[0]).toHaveProperty('comment_count', '13');
 
               body.articles.forEach(article => {
                 expect(article).toHaveProperty('comment_count');
@@ -103,7 +113,7 @@ describe('app', () => {
             .get('/api/articles')
             .expect(200)
             .then(({ body }) => {
-              expect(body.articles[7]).toHaveProperty('topic', 'cats');
+              expect(body.articles[4]).toHaveProperty('topic', 'cats');
 
               body.articles.forEach(article => {
                 expect(article).toHaveProperty('topic');
@@ -114,13 +124,13 @@ describe('app', () => {
         it('status: 200 - responds with oldest article first when sorted by default', () => {
           const expected = {
             author: 'butter_bridge',
-            title: 'Moustache',
-            article_id: 12,
+            title: 'Living in the shadow of a great man',
+            article_id: 1,
             topic: 'mitch',
-            created_at: '1974-11-26T12:21:54.171Z',
-            updated_at: '1974-11-26T12:21:54.171Z',
-            votes: 0,
-            comment_count: '0'
+            created_at: '2018-11-15T12:21:54.171Z',
+            updated_at: '2018-11-15T12:21:54.171Z',
+            votes: 100,
+            comment_count: '13'
           };
 
           return request(app)
@@ -136,18 +146,16 @@ describe('app', () => {
             .get('/api/articles?sort_by=votes')
             .expect(200)
             .then(({ body }) => {
-              expect(body.articles).toBeSortedBy('votes');
+              expect(body.articles).toBeSortedBy('votes', { descending: true });
             });
         });
 
         it('status: 200 - responds with articles ordered by order query', () => {
           return request(app)
-            .get('/api/articles?order=desc')
+            .get('/api/articles?order=asc')
             .expect(200)
             .then(({ body }) => {
-              expect(body.articles).toBeSortedBy('created_at', {
-                descending: true
-              });
+              expect(body.articles).toBeSortedBy('created_at');
             });
         });
 
@@ -191,7 +199,7 @@ describe('app', () => {
 
           return request(app)
             .get(
-              '/api/articles?sort_by=votes&order=desc&username=rogersop&topic=cats'
+              '/api/articles?sort_by=votes&order=asc&username=rogersop&topic=cats'
             )
             .expect(200)
             .then(({ body }) => {
@@ -200,12 +208,13 @@ describe('app', () => {
             });
         });
 
-        it('status: 400 - responds with Invalid Request Query when passed an invalid query parameter', () => {
+        it('status: 200 - responds with empty array when no articles match query arguments', () => {
           return request(app)
-            .get('/api/articles?cats=great')
-            .expect(400)
+            .get('/api/articles?topic=paper')
+            .expect(200)
             .then(({ body }) => {
-              expect(body.msg).toBe('Invalid Request Query');
+              expect(body.articles).toBeInstanceOf(Array);
+              expect(body.articles).toHaveLength(0);
             });
         });
 
@@ -218,12 +227,21 @@ describe('app', () => {
             });
         });
 
-        it('status: 404 - responds with Articles Not Found when no articles match query', () => {
+        it('status: 404 - responds with User Not Found when passed a username that does not exist as argument in query', () => {
           return request(app)
-            .get('/api/articles?topic=dog')
+            .get('/api/articles?username=doesnotexist')
             .expect(404)
             .then(({ body }) => {
-              expect(body.msg).toBe('Articles Not Found');
+              expect(body.msg).toBe('User Not Found');
+            });
+        });
+
+        it('status: 404 - responds with Topic Not Found when passed a topic that does not exist as argument in query', () => {
+          return request(app)
+            .get('/api/articles?topic=dogs')
+            .expect(404)
+            .then(({ body }) => {
+              expect(body.msg).toBe('Topic Not Found');
             });
         });
       });
@@ -376,6 +394,53 @@ describe('app', () => {
               });
           });
 
+          it('status: 200 - responds with article 11 with votes updated', () => {
+            return request(app)
+              .patch('/api/articles/11')
+              .send({ inc_votes: 15 })
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.article).toHaveProperty('author', 'icellusedkars');
+                expect(body.article).toHaveProperty('title', 'Am I a cat?');
+                expect(body.article).toHaveProperty('article_id', 11);
+                expect(body.article).toHaveProperty(
+                  'body',
+                  'Having run out of ideas for articles, I am staring at the wall blankly, like a cat. Does this make me a cat?'
+                );
+                expect(body.article).toHaveProperty('topic', 'mitch');
+                expect(body.article).toHaveProperty(
+                  'created_at',
+                  '1978-11-25T12:21:54.171Z'
+                );
+                expect(body.article).toHaveProperty('updated_at');
+                expect(body.article).toHaveProperty('votes', 15);
+                expect(body.article).toHaveProperty('comment_count', '0');
+              });
+          });
+
+          it('status: 200 - responds with article object unchanged when request body is made without inc_votes', () => {
+            return request(app)
+              .patch('/api/articles/11')
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.article).toHaveProperty('author', 'icellusedkars');
+                expect(body.article).toHaveProperty('title', 'Am I a cat?');
+                expect(body.article).toHaveProperty('article_id', 11);
+                expect(body.article).toHaveProperty(
+                  'body',
+                  'Having run out of ideas for articles, I am staring at the wall blankly, like a cat. Does this make me a cat?'
+                );
+                expect(body.article).toHaveProperty('topic', 'mitch');
+                expect(body.article).toHaveProperty(
+                  'created_at',
+                  '1978-11-25T12:21:54.171Z'
+                );
+                expect(body.article).toHaveProperty('updated_at');
+                expect(body.article).toHaveProperty('votes', 0);
+                expect(body.article).toHaveProperty('comment_count', '0');
+              });
+          });
+
           it('status: 400 - responds with Invalid Request when inc_votes is not an number', () => {
             return request(app)
               .patch('/api/articles/1')
@@ -383,15 +448,6 @@ describe('app', () => {
               .expect(400)
               .then(({ body }) => {
                 expect(body.msg).toBe('Invalid Request');
-              });
-          });
-
-          it('status: 400 - responds with Invalid Request Body when passed invalid key', () => {
-            return request(app)
-              .patch('/api/articles/1')
-              .expect(400)
-              .then(({ body }) => {
-                expect(body.msg).toBe('Invalid Request Body');
               });
           });
 
@@ -407,7 +463,7 @@ describe('app', () => {
 
         describe('unsupported methods', () => {
           it('status: 405 - responds with Method Not Allowed', () => {
-            const methods = ['post', 'put', 'options', 'trace'];
+            const methods = ['post', 'put', 'delete', 'options', 'trace'];
 
             const requestPromises = methods.map(method => {
               return request(app)
@@ -430,11 +486,19 @@ describe('app', () => {
                 .expect(200)
                 .then(({ body }) => {
                   expect(body.comments).toBeInstanceOf(Array);
+                });
+            });
+
+            it('status: 200 - responds with all comments for article id', () => {
+              return request(app)
+                .get('/api/articles/1/comments')
+                .expect(200)
+                .then(({ body }) => {
                   expect(body.comments).toHaveLength(13);
                 });
             });
 
-            it('status: 200 - responds with comment_id, author, body, votes, created_at and updated_at for each comment', () => {
+            it('status: 200 - responds with an array of comment objects', () => {
               return request(app)
                 .get('/api/articles/1/comments')
                 .expect(200)
@@ -450,23 +514,26 @@ describe('app', () => {
                 });
             });
 
-            it('status: 200 - responds with comments sorted by default, created_at and ascending', () => {
+            it('status: 200 - responds with comments sorted by default, created_at and descending', () => {
               return request(app)
                 .get('/api/articles/1/comments')
                 .expect(200)
                 .then(({ body }) => {
-                  expect(body.comments).toBeSortedBy('created_at');
+                  expect(body.comments).toBeSortedBy('created_at', {
+                    descending: true
+                  });
                 });
             });
 
-            it('status: 200 - responds with oldest comment first when sorted by default', () => {
+            it('status: 200 - responds with newest comment first when sorted by default', () => {
               const expected = {
-                comment_id: 18,
-                votes: 16,
-                created_at: '2000-11-26T12:36:03.389Z',
-                updated_at: '2000-11-26T12:36:03.389Z',
+                comment_id: 2,
+                votes: 14,
+                created_at: '2016-11-22T12:36:03.389Z',
+                updated_at: '2016-11-22T12:36:03.389Z',
                 author: 'butter_bridge',
-                body: 'This morning, I showered for nine minutes.'
+                body:
+                  'The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.'
               };
 
               return request(app)
@@ -482,33 +549,31 @@ describe('app', () => {
                 .get('/api/articles/1/comments?sort_by=votes')
                 .expect(200)
                 .then(({ body }) => {
-                  expect(body.comments).toBeSortedBy('votes');
+                  expect(body.comments).toBeSortedBy('votes', {
+                    descending: true
+                  });
                 });
             });
 
             it('status: 200 - responds with comments sorted in query order', () => {
               return request(app)
-                .get('/api/articles/1/comments?order=desc')
+                .get('/api/articles/1/comments?order=asc')
                 .expect(200)
                 .then(({ body }) => {
-                  expect(body.comments).toBeSortedBy('created_at', {
-                    descending: true
-                  });
+                  expect(body.comments).toBeSortedBy('created_at');
                 });
             });
 
             it('status: 200 - responds with comments sorted and ordered by query', () => {
               return request(app)
-                .get('/api/articles/1/comments?order=desc&sort_by=updated_at')
+                .get('/api/articles/1/comments?order=asc&sort_by=updated_at')
                 .expect(200)
                 .then(({ body }) => {
-                  expect(body.comments).toBeSortedBy('updated_at', {
-                    descending: true
-                  });
+                  expect(body.comments).toBeSortedBy('updated_at');
                 });
             });
 
-            it('status: 400 - responds with Invalid Request Query when passed an invalid sort by query', () => {
+            it('status: 400 - responds with Invalid Request Query when passed an invalid query', () => {
               return request(app)
                 .get('/api/articles/1/comments?sort_by=cats')
                 .expect(400)
@@ -546,24 +611,6 @@ describe('app', () => {
                 });
             });
 
-            it('status: 201 - responds with the posted comment object', () => {
-              return request(app)
-                .post('/api/articles/3/comments')
-                .send({ username: 'icellusedkars', body: 'I love cats also' })
-                .expect(201)
-                .then(({ body }) => {
-                  expect(body.comment).toHaveProperty('comment_id', 19);
-                  expect(body.comment).toHaveProperty(
-                    'author',
-                    'icellusedkars'
-                  );
-                  expect(body.comment).toHaveProperty(
-                    'body',
-                    'I love cats also'
-                  );
-                });
-            });
-
             it('status: 201 - responds with votes defaulted to 0', () => {
               return request(app)
                 .post('/api/articles/2/comments')
@@ -582,6 +629,24 @@ describe('app', () => {
                 .then(({ body }) => {
                   expect(body.comment.created_at).toBeTruthy();
                   expect(body.comment.updated_at).toBeTruthy();
+                });
+            });
+
+            it('status: 201 - responds with the posted comment object', () => {
+              return request(app)
+                .post('/api/articles/3/comments')
+                .send({ username: 'icellusedkars', body: 'I love cats also' })
+                .expect(201)
+                .then(({ body }) => {
+                  expect(body.comment).toHaveProperty('comment_id', 19);
+                  expect(body.comment).toHaveProperty(
+                    'author',
+                    'icellusedkars'
+                  );
+                  expect(body.comment).toHaveProperty(
+                    'body',
+                    'I love cats also'
+                  );
                 });
             });
 
@@ -617,7 +682,7 @@ describe('app', () => {
 
           describe('unsupported methods', () => {
             it('status: 405 - responds with Method Not Allowed', () => {
-              const methods = ['patch', 'put', 'delete', 'options', 'trace'];
+              const methods = ['put', 'delete', 'options', 'trace', 'patch'];
 
               const requestPromises = methods.map(method => {
                 return request(app)
@@ -678,21 +743,6 @@ describe('app', () => {
               });
           });
 
-          it('status: 200 - responds with a comment object matching parameter id', () => {
-            return request(app)
-              .patch('/api/comments/1')
-              .send({ inc_votes: 1 })
-              .expect(200)
-              .then(({ body }) => {
-                expect(body.comment).toHaveProperty('comment_id', 1);
-                expect(body.comment).toHaveProperty('author', 'butter_bridge');
-                expect(body.comment).toHaveProperty(
-                  'body',
-                  "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!"
-                );
-              });
-          });
-
           it('status: 200 - responds with votes incremented by 6', () => {
             return request(app)
               .patch('/api/comments/2')
@@ -725,6 +775,37 @@ describe('app', () => {
               });
           });
 
+          it('status: 200 - responds with a comment object matching parameter id', () => {
+            return request(app)
+              .patch('/api/comments/1')
+              .send({ inc_votes: 1 })
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.comment).toHaveProperty('comment_id', 1);
+                expect(body.comment).toHaveProperty('author', 'butter_bridge');
+                expect(body.comment).toHaveProperty(
+                  'body',
+                  "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!"
+                );
+                expect(body.comment).toHaveProperty('votes', 17);
+              });
+          });
+
+          it('status: 200 - responds with unchanged article when body is missing inc_votes', () => {
+            return request(app)
+              .patch('/api/comments/1')
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.comment).toHaveProperty('comment_id', 1);
+                expect(body.comment).toHaveProperty('author', 'butter_bridge');
+                expect(body.comment).toHaveProperty(
+                  'body',
+                  "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!"
+                );
+                expect(body.comment).toHaveProperty('votes', 16);
+              });
+          });
+
           it('status: 400 - responds with Invalid Request when inc_votes is not an number', () => {
             return request(app)
               .patch('/api/comments/5')
@@ -732,16 +813,6 @@ describe('app', () => {
               .expect(400)
               .then(({ body }) => {
                 expect(body.msg).toBe('Invalid Request');
-              });
-          });
-
-          it('status: 400 - responds with Invalid Request Body when passed invalid key', () => {
-            return request(app)
-              .patch('/api/comments/6')
-              .send({ cats: 6 })
-              .expect(400)
-              .then(({ body }) => {
-                expect(body.msg).toBe('Invalid Request Body');
               });
           });
 
@@ -758,7 +829,7 @@ describe('app', () => {
 
         describe('unsupported methods', () => {
           it('status: 405 - responds with Method Not Allowed', () => {
-            const methods = ['get', 'put', 'options', 'trace'];
+            const methods = ['get', 'post', 'put', 'options', 'trace'];
 
             const requestPromises = methods.map(method => {
               return request(app)
@@ -783,11 +854,19 @@ describe('app', () => {
             .expect(200)
             .then(({ body }) => {
               expect(body.topics).toBeInstanceOf(Array);
+            });
+        });
+
+        it('status: 200 - responds with all topics', () => {
+          return request(app)
+            .get('/api/topics')
+            .expect(200)
+            .then(({ body }) => {
               expect(body.topics).toHaveLength(3);
             });
         });
 
-        it('status: 200 - responds with description and slug keys for each topic', () => {
+        it('status: 200 - responds with an array of topic objects', () => {
           return request(app)
             .get('/api/topics')
             .expect(200)

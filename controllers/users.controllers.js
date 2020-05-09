@@ -1,6 +1,6 @@
 const { selectUser } = require('../models/users.models');
 
-exports.getUsers = (req, res, next) => {
+exports.getUser = (req, res, next) => {
   const { username } = req.params;
 
   selectUser(username)

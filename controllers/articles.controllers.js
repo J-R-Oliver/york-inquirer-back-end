@@ -1,8 +1,18 @@
 const {
+  selectArticles,
   selectArticle,
-  updateArticle,
-  selectArticles
+  updateArticle
 } = require('../models/articles.models');
+
+exports.getArticles = (req, res, next) => {
+  const { sort_by, order, username, topic, ...invalidQueries } = req.query;
+
+  selectArticles(sort_by, order, username, topic, invalidQueries)
+    .then(articles => {
+      res.send({ articles });
+    })
+    .catch(next);
+};
 
 exports.getArticle = (req, res, next) => {
   const { article_id } = req.params;
@@ -21,16 +31,6 @@ exports.patchArticle = (req, res, next) => {
   updateArticle(article_id, inc_votes)
     .then(([article]) => {
       res.send({ article });
-    })
-    .catch(next);
-};
-
-exports.getArticles = (req, res, next) => {
-  const { sort_by, order, username, topic, ...invalidQueries } = req.query;
-
-  selectArticles(sort_by, order, username, topic, invalidQueries)
-    .then(articles => {
-      res.send({ articles });
     })
     .catch(next);
 };

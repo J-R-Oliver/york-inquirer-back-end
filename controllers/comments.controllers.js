@@ -1,20 +1,9 @@
 const {
-  insertComment,
   selectComments,
-  updateComment,
-  deleteComment
+  insertComment,
+  deleteComment,
+  updateComment
 } = require('../models/comments.models');
-
-exports.postComment = (req, res, next) => {
-  const { article_id } = req.params;
-  const { username, body } = req.body;
-
-  insertComment(article_id, username, body)
-    .then(([comment]) => {
-      res.status(201).send({ comment });
-    })
-    .catch(next);
-};
 
 exports.getComments = (req, res, next) => {
   const { article_id } = req.params;
@@ -27,13 +16,13 @@ exports.getComments = (req, res, next) => {
     .catch(next);
 };
 
-exports.patchComment = (req, res, next) => {
-  const { comment_id } = req.params;
-  const { inc_votes } = req.body;
+exports.postComment = (req, res, next) => {
+  const { article_id } = req.params;
+  const { username, body } = req.body;
 
-  updateComment(comment_id, inc_votes)
+  insertComment(article_id, username, body)
     .then(([comment]) => {
-      res.send({ comment });
+      res.status(201).send({ comment });
     })
     .catch(next);
 };
@@ -44,6 +33,17 @@ exports.deleteComment = (req, res, next) => {
   deleteComment(comment_id)
     .then(() => {
       res.sendStatus(204);
+    })
+    .catch(next);
+};
+
+exports.patchComment = (req, res, next) => {
+  const { comment_id } = req.params;
+  const { inc_votes } = req.body;
+
+  updateComment(comment_id, inc_votes)
+    .then(([comment]) => {
+      res.send({ comment });
     })
     .catch(next);
 };

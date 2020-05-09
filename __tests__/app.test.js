@@ -46,65 +46,6 @@ describe('app', () => {
       });
     });
 
-    describe('/topics', () => {
-      describe('GET', () => {
-        it('status: 200 - responds with array of topics', () => {
-          return request(app)
-            .get('/api/topics')
-            .expect(200)
-            .then(({ body }) => {
-              expect(body.topics).toBeInstanceOf(Array);
-              expect(body.topics).toHaveLength(3);
-            });
-        });
-
-        it('status: 200 - responds with description and slug keys for each topic', () => {
-          return request(app)
-            .get('/api/topics')
-            .expect(200)
-            .then(({ body }) => {
-              body.topics.forEach(topic => {
-                expect(topic).toHaveProperty('description');
-                expect(topic).toHaveProperty('slug');
-              });
-            });
-        });
-
-        it('status: 200 - responds with topics sorted alphabetically by slug', () => {
-          return request(app)
-            .get('/api/topics')
-            .expect(200)
-            .then(({ body }) => {
-              expect(body.topics).toBeSortedBy('slug');
-            });
-        });
-      });
-
-      describe('unsupported methods', () => {
-        it('status: 405 - responds with Method Not Allowed', () => {
-          const methods = [
-            'post',
-            'put',
-            'delete',
-            'options',
-            'trace',
-            'patch'
-          ];
-
-          const requestPromises = methods.map(method => {
-            return request(app)
-              [method]('/api/topics')
-              .expect(405)
-              .then(({ body }) => {
-                expect(body.msg).toBe('Method Not Allowed');
-              });
-          });
-
-          return Promise.all(requestPromises);
-        });
-      });
-    });
-
     describe('/articles', () => {
       describe('GET', () => {
         it('status: 200 - responds with an array of articles', () => {
@@ -696,6 +637,31 @@ describe('app', () => {
 
     describe('/comments', () => {
       describe('/:comment_id', () => {
+        describe('DELETE', () => {
+          // eslint-disable-next-line jest/expect-expect
+          it('status: 204 - responds with no content', () => {
+            return request(app).del('/api/comments/1').expect(204);
+          });
+
+          it('status: 400 responds with Invalid Request when :comment_id is not an number', () => {
+            return request(app)
+              .del('/api/comments/cat')
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).toBe('Invalid Request');
+              });
+          });
+
+          it('status: 404 responds with Comment Not Found when id does not exist', () => {
+            return request(app)
+              .del('/api/comments/66')
+              .expect(404)
+              .then(({ body }) => {
+                expect(body.msg).toBe('Comment Not Found');
+              });
+          });
+        });
+
         describe('PATCH', () => {
           it('status: 200 - responds with a comment object', () => {
             return request(app)
@@ -790,31 +756,6 @@ describe('app', () => {
           });
         });
 
-        describe('DELETE', () => {
-          // eslint-disable-next-line jest/expect-expect
-          it('status: 204 - responds with no content', () => {
-            return request(app).del('/api/comments/1').expect(204);
-          });
-
-          it('status: 400 responds with Invalid Request when :comment_id is not an number', () => {
-            return request(app)
-              .del('/api/comments/cat')
-              .expect(400)
-              .then(({ body }) => {
-                expect(body.msg).toBe('Invalid Request');
-              });
-          });
-
-          it('status: 404 responds with Comment Not Found when id does not exist', () => {
-            return request(app)
-              .del('/api/comments/66')
-              .expect(404)
-              .then(({ body }) => {
-                expect(body.msg).toBe('Comment Not Found');
-              });
-          });
-        });
-
         describe('unsupported methods', () => {
           it('status: 405 - responds with Method Not Allowed', () => {
             const methods = ['get', 'put', 'options', 'trace'];
@@ -830,6 +771,65 @@ describe('app', () => {
 
             return Promise.all(requestPromises);
           });
+        });
+      });
+    });
+
+    describe('/topics', () => {
+      describe('GET', () => {
+        it('status: 200 - responds with array of topics', () => {
+          return request(app)
+            .get('/api/topics')
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.topics).toBeInstanceOf(Array);
+              expect(body.topics).toHaveLength(3);
+            });
+        });
+
+        it('status: 200 - responds with description and slug keys for each topic', () => {
+          return request(app)
+            .get('/api/topics')
+            .expect(200)
+            .then(({ body }) => {
+              body.topics.forEach(topic => {
+                expect(topic).toHaveProperty('description');
+                expect(topic).toHaveProperty('slug');
+              });
+            });
+        });
+
+        it('status: 200 - responds with topics sorted alphabetically by slug', () => {
+          return request(app)
+            .get('/api/topics')
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.topics).toBeSortedBy('slug');
+            });
+        });
+      });
+
+      describe('unsupported methods', () => {
+        it('status: 405 - responds with Method Not Allowed', () => {
+          const methods = [
+            'post',
+            'put',
+            'delete',
+            'options',
+            'trace',
+            'patch'
+          ];
+
+          const requestPromises = methods.map(method => {
+            return request(app)
+              [method]('/api/topics')
+              .expect(405)
+              .then(({ body }) => {
+                expect(body.msg).toBe('Method Not Allowed');
+              });
+          });
+
+          return Promise.all(requestPromises);
         });
       });
     });

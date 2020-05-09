@@ -7,7 +7,7 @@
   "description": "A newspaper website allowing for user comments.",
   "main": "index.js",
   "scripts": {
-    "create-dbs": "psql -f ./db/setup.sql",
+    "create-db": "psql -f ./db/setup.sql",
     "create-db-migration": "knex migrate:make",
     "migrate-db-latest": "knex migrate:latest",
     "migrate-db-rollback": "knex migrate:rollback",

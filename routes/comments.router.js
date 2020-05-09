@@ -1,14 +1,14 @@
 const commentsRouter = require('express').Router();
 const {
-  patchComment,
-  deleteComment
+  deleteComment,
+  patchComment
 } = require('../controllers/comments.controllers');
 const { usMethodHandler } = require('../controllers/error.controllers');
 
 commentsRouter
   .route('/:comment_id')
-  .patch(patchComment)
   .delete(deleteComment)
+  .patch(patchComment)
   .all(usMethodHandler);
 
 module.exports = commentsRouter;

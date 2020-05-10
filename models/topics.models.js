@@ -15,3 +15,9 @@ exports.selectTopic = topicSlug => {
         : user;
     });
 };
+
+exports.insertTopic = (slug, description) => {
+  return knex('topics')
+    .insert({ slug, description })
+    .returning(['slug', 'description']);
+};

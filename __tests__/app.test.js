@@ -908,16 +908,54 @@ describe('app', () => {
         });
       });
 
+      describe('POST', () => {
+        it('status: 201 - responds with a topic object', () => {
+          return request(app)
+            .post('/api/topics')
+            .send({
+              slug: 'Lemons',
+              description: 'When life gives you lemons...'
+            })
+            .expect(201)
+            .then(({ body }) => {
+              expect(body.topic).toHaveProperty('description');
+              expect(body.topic).toHaveProperty('slug');
+            });
+        });
+
+        it('status: 201 - responds with the posted user object', () => {
+          return request(app)
+            .post('/api/topics')
+            .send({
+              slug: 'Chocolate',
+              description: 'Better than...'
+            })
+            .expect(201)
+            .then(({ body }) => {
+              expect(body.topic).toHaveProperty(
+                'description',
+                'Better than...'
+              );
+              expect(body.topic).toHaveProperty('slug', 'Chocolate');
+            });
+        });
+
+        it('status: 400 - responds with Invalid Request Body when passed invalid body', () => {
+          return request(app)
+            .post('/api/topics')
+            .send({
+              description: 'Better than...'
+            })
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).toBe('Invalid Request Body');
+            });
+        });
+      });
+
       describe('unsupported methods', () => {
         it('status: 405 - responds with Method Not Allowed', () => {
-          const methods = [
-            'post',
-            'put',
-            'delete',
-            'options',
-            'trace',
-            'patch'
-          ];
+          const methods = ['put', 'delete', 'options', 'trace', 'patch'];
 
           const requestPromises = methods.map(method => {
             return request(app)

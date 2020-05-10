@@ -345,6 +345,57 @@ describe('app', () => {
           });
         });
 
+        describe('DELETE', () => {
+          // eslint-disable-next-line jest/expect-expect
+          it('status: 204 - responds with no content', () => {
+            return request(app).del('/api/articles/4').expect(204);
+          });
+
+          it('status: 400 - responds with Invalid Request when :article_id is not an number', () => {
+            return request(app)
+              .del('/api/articles/cat')
+              .expect(400)
+              .then(({ body }) => {
+                expect(body.msg).toBe('Invalid Request');
+              });
+          });
+
+          it('status: 404 - responds with Article Not Found when id does not exist', () => {
+            return request(app)
+              .del('/api/articles/66')
+              .expect(404)
+              .then(({ body }) => {
+                expect(body.msg).toBe('Article Not Found');
+              });
+          });
+
+          it('status: 404 - responds with Article Not Found following delete request', () => {
+            return request(app)
+              .del('/api/articles/4')
+              .then(() => {
+                return request(app)
+                  .get('/api/articles/4')
+                  .expect(404)
+                  .then(({ body }) => {
+                    expect(body.msg).toBe('Article Not Found');
+                  });
+              });
+          });
+
+          it('status: 404 - responds with Comment Not Found following delete request', () => {
+            return request(app)
+              .del('/api/articles/1')
+              .then(() => {
+                return request(app)
+                  .del('/api/comments/2')
+                  .expect(404)
+                  .then(({ body }) => {
+                    expect(body.msg).toBe('Comment Not Found');
+                  });
+              });
+          });
+        });
+
         describe('PATCH', () => {
           it('status: 200 - responds with an article object', () => {
             return request(app)
@@ -463,7 +514,7 @@ describe('app', () => {
 
         describe('unsupported methods', () => {
           it('status: 405 - responds with Method Not Allowed', () => {
-            const methods = ['post', 'put', 'delete', 'options', 'trace'];
+            const methods = ['post', 'put', 'options', 'trace'];
 
             const requestPromises = methods.map(method => {
               return request(app)

@@ -53,6 +53,17 @@ exports.selectArticle = article_id => {
     });
 };
 
+exports.deleteArticle = article_id => {
+  return knex('articles')
+    .del()
+    .where({ article_id })
+    .then(affectedRows => {
+      return affectedRows === 0
+        ? Promise.reject({ status: 404, msg: 'Article Not Found' })
+        : Promise.resolve();
+    });
+};
+
 exports.updateArticle = (article_id, inc_votes) => {
   return knex('updated_article')
     .with(

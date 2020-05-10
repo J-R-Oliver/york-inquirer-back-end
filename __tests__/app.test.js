@@ -896,16 +896,16 @@ describe('app', () => {
               expect(body.topics).toBeSortedBy('slug');
             });
         });
-      });
 
-      it('status: 200 - responds with first optic in alphabetical order', () => {
-        return request(app)
-          .get('/api/topics')
-          .expect(200)
-          .then(({ body }) => {
-            expect(body.topics[0]).toHaveProperty('description', 'Not dogs');
-            expect(body.topics[0]).toHaveProperty('slug', 'cats');
-          });
+        it('status: 200 - responds with first optic in alphabetical order', () => {
+          return request(app)
+            .get('/api/topics')
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.topics[0]).toHaveProperty('description', 'Not dogs');
+              expect(body.topics[0]).toHaveProperty('slug', 'cats');
+            });
+        });
       });
 
       describe('unsupported methods', () => {
@@ -934,6 +934,176 @@ describe('app', () => {
     });
 
     describe('/users', () => {
+      describe('GET', () => {
+        it('status: 200 - responds with array of users', () => {
+          return request(app)
+            .get('/api/users')
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.users).toBeInstanceOf(Array);
+            });
+        });
+
+        it('status: 200 - responds with all users', () => {
+          return request(app)
+            .get('/api/users')
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.users).toHaveLength(4);
+            });
+        });
+
+        it('status: 200 - responds with total_votes for each user defaulting to 0', () => {
+          return request(app)
+            .get('/api/users')
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.users[3]).toHaveProperty('total_votes', '0');
+
+              body.users.forEach(user => {
+                expect(user).toHaveProperty('total_votes');
+              });
+            });
+        });
+
+        it('status: 200 - responds with first_name and last_name as name for each user', () => {
+          return request(app)
+            .get('/api/users')
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.users[3]).toHaveProperty('name', 'paul paulson');
+
+              body.users.forEach(user => {
+                expect(user).toHaveProperty('name');
+              });
+            });
+        });
+
+        it('status: 200 - responds with array of user objects', () => {
+          return request(app)
+            .get('/api/users')
+            .expect(200)
+            .then(({ body }) => {
+              body.users.forEach(user => {
+                expect(user).toHaveProperty('username');
+                expect(user).toHaveProperty('avatar_url');
+              });
+            });
+        });
+
+        it('status: 200 - responds with users sorted by total_votes', () => {
+          return request(app)
+            .get('/api/users')
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.users).toBeSortedBy('total_votes', {
+                descending: true
+              });
+            });
+        });
+
+        it('status: 200 - responds with user with highest votes first', () => {
+          return request(app)
+            .get('/api/users')
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.users[0]).toHaveProperty('username', 'butter_bridge');
+              expect(body.users[0]).toHaveProperty(
+                'avatar_url',
+                'https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg'
+              );
+              expect(body.users[0]).toHaveProperty('name', 'jonny jim');
+              expect(body.users[0]).toHaveProperty('total_votes', '644');
+            });
+        });
+      });
+
+      describe('POST', () => {
+        it('status: 201 - responds with a user object', () => {
+          return request(app)
+            .post('/api/users')
+            .send({
+              username: 'cat_lover',
+              avatar_url: 'https://www.testlink.co.uk',
+              first_name: 'Kate',
+              last_name: 'Dave'
+            })
+            .expect(201)
+            .then(({ body }) => {
+              expect(body.user).toHaveProperty('username');
+              expect(body.user).toHaveProperty('avatar_url');
+              expect(body.user).toHaveProperty('name');
+              expect(body.user).toHaveProperty('total_votes');
+            });
+        });
+
+        it('status: 201 - responds with total_votes defaulted to 0', () => {
+          return request(app)
+            .post('/api/users')
+            .send({
+              username: 'cat_lover',
+              avatar_url: 'https://www.testlink.co.uk',
+              first_name: 'Kate',
+              last_name: 'Dave'
+            })
+            .expect(201)
+            .then(({ body }) => {
+              expect(body.user).toHaveProperty('total_votes', '0');
+            });
+        });
+
+        it('status: 201 - responds with the posted user object', () => {
+          return request(app)
+            .post('/api/users')
+            .send({
+              username: 'cat_lover',
+              avatar_url: 'https://www.testlink.co.uk',
+              first_name: 'Kate',
+              last_name: 'Dave'
+            })
+            .expect(201)
+            .then(({ body }) => {
+              expect(body.user).toHaveProperty('username', 'cat_lover');
+              expect(body.user).toHaveProperty(
+                'avatar_url',
+                'https://www.testlink.co.uk'
+              );
+              expect(body.user).toHaveProperty('name', 'Kate Dave');
+            });
+        });
+
+        it('status: 400 - responds with Invalid Request Body when passed invalid body', () => {
+          return request(app)
+            .post('/api/users')
+            .send({
+              avatar_url: 'https://www.testlink.co.uk',
+              first_name: 'Kate',
+              last_name: 'Dave'
+            })
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).toBe('Invalid Request Body');
+            });
+        });
+      });
+
+      describe('unsupported methods', () => {
+        it('status: 405 - responds with Method Not Allowed', () => {
+          const methods = ['put', 'delete', 'options', 'trace', 'patch'];
+
+          const requestPromises = methods.map(method => {
+            return request(app)
+              [method]('/api/users')
+              .expect(405)
+              .then(({ body }) => {
+                expect(body.msg).toBe('Method Not Allowed');
+              });
+          });
+
+          return Promise.all(requestPromises);
+        });
+      });
+
       describe('/:username', () => {
         describe('GET', () => {
           it('status: 200 - responds with an user object', () => {

@@ -246,16 +246,195 @@ describe('app', () => {
         });
       });
 
+      describe('POST', () => {
+        it('status: 201 - responds with an article object', () => {
+          return request(app)
+            .post('/api/articles')
+            .send({
+              username: 'butter_bridge',
+              title: 'My test article',
+              body: 'Test article about cats',
+              topic: 'cats'
+            })
+            .expect(201)
+            .then(({ body }) => {
+              expect(body.article).toHaveProperty('author');
+              expect(body.article).toHaveProperty('title');
+              expect(body.article).toHaveProperty('article_id');
+              expect(body.article).toHaveProperty('body');
+              expect(body.article).toHaveProperty('topic');
+              expect(body.article).toHaveProperty('created_at');
+              expect(body.article).toHaveProperty('updated_at');
+              expect(body.article).toHaveProperty('votes');
+              expect(body.article).toHaveProperty('comment_count');
+            });
+        });
+
+        it('status: 201 - responds with votes defaulted to 0', () => {
+          return request(app)
+            .post('/api/articles')
+            .send({
+              username: 'butter_bridge',
+              title: 'My test article',
+              body: 'Test article about cats',
+              topic: 'cats'
+            })
+            .expect(201)
+            .then(({ body }) => {
+              expect(body.article).toHaveProperty('votes', 0);
+            });
+        });
+
+        it('status: 201 - responds with comment_count defaulted to 0', () => {
+          return request(app)
+            .post('/api/articles')
+            .send({
+              username: 'butter_bridge',
+              title: 'My test article',
+              body: 'Test article about cats',
+              topic: 'cats'
+            })
+            .expect(201)
+            .then(({ body }) => {
+              expect(body.article).toHaveProperty('comment_count', '0');
+            });
+        });
+
+        it('status: 201 - responds with created_at and update_at not set to null', () => {
+          return request(app)
+            .post('/api/articles')
+            .send({
+              username: 'butter_bridge',
+              title: 'My test article',
+              body: 'Test article about cats',
+              topic: 'cats'
+            })
+            .expect(201)
+            .then(({ body }) => {
+              expect(body.article.updated_at).toBeTruthy();
+              expect(body.article.created_at).toBeTruthy();
+            });
+        });
+
+        it('status: 201 - responds with author based on request username', () => {
+          return request(app)
+            .post('/api/articles')
+            .send({
+              username: 'butter_bridge',
+              title: 'My test article',
+              body: 'Test article about cats',
+              topic: 'cats'
+            })
+            .expect(201)
+            .then(({ body }) => {
+              expect(body.article).toHaveProperty('author', 'butter_bridge');
+            });
+        });
+
+        it('status: 201 - responds with article_id', () => {
+          return request(app)
+            .post('/api/articles')
+            .send({
+              username: 'butter_bridge',
+              title: 'My test article',
+              body: 'Test article about cats',
+              topic: 'cats'
+            })
+            .expect(201)
+            .then(({ body }) => {
+              expect(body.article).toHaveProperty('article_id', 13);
+            });
+        });
+
+        it('status: 201 - responds with topic', () => {
+          return request(app)
+            .post('/api/articles')
+            .send({
+              username: 'butter_bridge',
+              title: 'My test article',
+              body: 'Test article about cats',
+              topic: 'cats'
+            })
+            .expect(201)
+            .then(({ body }) => {
+              expect(body.article).toHaveProperty('topic', 'cats');
+            });
+        });
+
+        it('status: 201 - responds with the posted article object', () => {
+          return request(app)
+            .post('/api/articles')
+            .send({
+              username: 'butter_bridge',
+              title: 'My test article',
+              body: 'Test article about cats',
+              topic: 'cats'
+            })
+            .expect(201)
+            .then(({ body }) => {
+              expect(body.article).toHaveProperty('author', 'butter_bridge');
+              expect(body.article).toHaveProperty('title', 'My test article');
+              expect(body.article).toHaveProperty('article_id', 13);
+              expect(body.article).toHaveProperty(
+                'body',
+                'Test article about cats'
+              );
+              expect(body.article).toHaveProperty('topic', 'cats');
+              expect(body.article).toHaveProperty('created_at');
+              expect(body.article).toHaveProperty('updated_at');
+              expect(body.article).toHaveProperty('votes', 0);
+              expect(body.article).toHaveProperty('comment_count', '0');
+            });
+        });
+
+        it('status: 400 - responds with Invalid Request Body when passed invalid body', () => {
+          return request(app)
+            .post('/api/articles')
+            .send({
+              username: 'butter_bridge',
+              body: 'Test article about cats',
+              topic: 'cats'
+            })
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).toBe('Invalid Request Body');
+            });
+        });
+
+        it('status: 404 - responds with User Not Found when passed a non-existent username', () => {
+          return request(app)
+            .post('/api/articles')
+            .send({
+              username: 'unknown_user',
+              title: 'My test article',
+              body: 'Test article about cats',
+              topic: 'cats'
+            })
+            .expect(404)
+            .then(({ body }) => {
+              expect(body.msg).toBe('User Not Found');
+            });
+        });
+
+        it('status: 404 - responds with Topic Not Found when passed a non-existent topic', () => {
+          return request(app)
+            .post('/api/articles')
+            .send({
+              username: 'butter_bridge',
+              title: 'My test article',
+              body: 'Test article about cats',
+              topic: 'unknown topic'
+            })
+            .expect(404)
+            .then(({ body }) => {
+              expect(body.msg).toBe('Topic Not Found');
+            });
+        });
+      });
+
       describe('unsupported methods', () => {
         it('status: 405 - responds with Method Not Allowed', () => {
-          const methods = [
-            'post',
-            'put',
-            'delete',
-            'options',
-            'trace',
-            'patch'
-          ];
+          const methods = ['put', 'delete', 'options', 'trace', 'patch'];
 
           const requestPromises = methods.map(method => {
             return request(app)

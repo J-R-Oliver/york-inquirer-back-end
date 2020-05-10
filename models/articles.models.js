@@ -53,6 +53,51 @@ exports.selectArticle = article_id => {
     });
 };
 
+exports.insertArticle = (username, slug, title, body) => {
+  return knex('inserted_article')
+    .with(
+      'inserted_article',
+      knex('articles')
+        .insert({
+          user_id: knex('users').select('user_id').where({ username }),
+          topic_id: knex('topics').select('topic_id').where({ slug }),
+          title,
+          body
+        })
+        .returning('*')
+    )
+    .select(
+      'users.username AS author',
+      'inserted_article.title',
+      'inserted_article.article_id',
+      'inserted_article.body',
+      'topics.slug AS topic',
+      'inserted_article.created_at',
+      'inserted_article.updated_at',
+      'inserted_article.votes'
+    )
+    .count('comments.comment_id', { as: 'comment_count' })
+    .join('topics', 'inserted_article.topic_id', '=', 'topics.topic_id')
+    .join('users', 'inserted_article.user_id', '=', 'users.user_id')
+    .leftJoin(
+      'comments',
+      'inserted_article.article_id',
+      '=',
+      'comments.article_id'
+    )
+    .groupBy(
+      'inserted_article.article_id',
+      'inserted_article.title',
+      'inserted_article.article_id',
+      'inserted_article.body',
+      'inserted_article.created_at',
+      'inserted_article.updated_at',
+      'inserted_article.votes',
+      'users.username',
+      'topics.slug'
+    );
+};
+
 exports.deleteArticle = article_id => {
   return knex('articles')
     .del()

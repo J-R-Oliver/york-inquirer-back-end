@@ -1,6 +1,7 @@
 const {
   selectArticles,
   selectArticle,
+  insertArticle,
   deleteArticle,
   updateArticle
 } = require('../models/articles.models');
@@ -33,6 +34,22 @@ exports.getArticle = (req, res, next) => {
   selectArticle(article_id)
     .then(([article]) => {
       res.send({ article });
+    })
+    .catch(next);
+};
+
+exports.postArticle = (req, res, next) => {
+  const { username, topic, title, body } = req.body;
+
+  const promiseArr = [
+    insertArticle(username, topic, title, body),
+    selectUser(username),
+    selectTopic(topic)
+  ];
+
+  Promise.all(promiseArr)
+    .then(([[article]]) => {
+      res.status(201).send({ article });
     })
     .catch(next);
 };

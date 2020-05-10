@@ -1,6 +1,6 @@
 const knex = require('../db/connection');
 
-exports.selectArticles = (sort_by, order, username, topic) => {
+exports.selectArticles = (sort_by, order, username, slug) => {
   return knex('articles')
     .select(
       'users.username AS author',
@@ -18,12 +18,12 @@ exports.selectArticles = (sort_by, order, username, topic) => {
     .groupBy('articles.article_id', 'users.username', 'topics.slug')
     .orderBy(sort_by, order)
     .modify(query => {
-      if (username && topic) {
-        query.where({ 'users.username': username, 'topics.slug': topic });
+      if (username && slug) {
+        query.where({ username, slug });
       } else if (username) {
-        query.where({ 'users.username': username });
-      } else if (topic) {
-        query.where({ 'topics.slug': topic });
+        query.where({ username });
+      } else if (slug) {
+        query.where({ slug });
       }
     });
 };
@@ -69,7 +69,7 @@ exports.updateArticle = (article_id, inc_votes) => {
     .with(
       'updated_article',
       knex('articles')
-        .where({ 'articles.article_id': article_id })
+        .where({ article_id })
         .increment('votes', inc_votes)
         .returning('*')
     )

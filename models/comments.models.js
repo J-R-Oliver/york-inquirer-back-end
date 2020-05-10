@@ -11,7 +11,7 @@ exports.selectComments = (article_id, sort_by, order) => {
       'comments.updated_at'
     )
     .join('users', 'comments.user_id', '=', 'users.user_id')
-    .where({ 'comments.article_id': article_id })
+    .where({ article_id })
     .orderBy(sort_by, order);
 };
 
@@ -35,7 +35,7 @@ exports.insertComment = (article_id, username, body) => {
 exports.deleteComment = comment_id => {
   return knex('comments')
     .del()
-    .where({ 'comments.comment_id': comment_id })
+    .where({ comment_id })
     .then(affectedRows => {
       return affectedRows === 0
         ? Promise.reject({ status: 404, msg: 'Comment Not Found' })
@@ -48,7 +48,7 @@ exports.updateComment = (comment_id, inc_votes) => {
     .with(
       'updated_comment',
       knex('comments')
-        .where({ 'comments.comment_id': comment_id })
+        .where({ comment_id })
         .increment('votes', inc_votes)
         .returning('*')
     )

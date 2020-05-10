@@ -4,10 +4,10 @@ exports.selectTopics = () => {
   return knex('topics').select('slug', 'description').orderBy('slug');
 };
 
-exports.selectTopic = topicSlug => {
+exports.selectTopic = slug => {
   return knex('topics')
     .select('slug', 'description')
-    .where({ 'topics.slug': topicSlug })
+    .where({ slug })
     .orderBy('slug')
     .then(user => {
       return user.length === 0

@@ -16,7 +16,8 @@ exports.knexErrorHandler = (err, req, res, next) => {
   const errorCodes = {
     '22P02': { status: 400, msg: 'Invalid Request' },
     23503: { status: 404, msg: 'Article Not Found' },
-    42703: { status: 400, msg: 'Invalid Request Query' }
+    42703: { status: 400, msg: 'Invalid Request Query' },
+    23502: { status: 400, msg: 'Invalid Request Body' }
   };
 
   if (err.code in errorCodes) {

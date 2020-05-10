@@ -10,9 +10,8 @@ exports.selectTopic = topicSlug => {
     .where({ 'topics.slug': topicSlug })
     .orderBy('slug')
     .then(user => {
-      if (user.length === 0) {
-        return Promise.reject({ status: 404, msg: 'Topic Not Found' });
-      }
-      return user;
+      return user.length === 0
+        ? Promise.reject({ status: 404, msg: 'Topic Not Found' })
+        : user;
     });
 };

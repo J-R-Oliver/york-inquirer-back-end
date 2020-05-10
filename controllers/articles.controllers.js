@@ -7,7 +7,12 @@ const { selectUser } = require('../models/users.models');
 const { selectTopic } = require('../models/topics.models');
 
 exports.getArticles = (req, res, next) => {
-  const { sort_by = 'created_at', order = 'desc', username, topic } = req.query;
+  const {
+    sort_by = 'created_at',
+    order = 'desc',
+    author: username,
+    topic
+  } = req.query;
 
   const promiseArr = [selectArticles(sort_by, order, username, topic)];
 

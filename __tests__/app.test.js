@@ -159,9 +159,9 @@ describe('app', () => {
             });
         });
 
-        it('status: 200 - responds with articles whose author matches username query', () => {
+        it('status: 200 - responds with articles whose author matches author query', () => {
           return request(app)
-            .get('/api/articles?username=rogersop')
+            .get('/api/articles?author=rogersop')
             .expect(200)
             .then(({ body }) => {
               expect(body.articles).toHaveLength(3);
@@ -185,7 +185,7 @@ describe('app', () => {
             });
         });
 
-        it('status: 200 - responds with articles who are sorted and ordered by query, and filtered by username and topic query', () => {
+        it('status: 200 - responds with articles who are sorted and ordered by query, and filtered by author and topic query', () => {
           const expected = {
             author: 'rogersop',
             title: 'UNCOVERED: catspiracy to bring down democracy',
@@ -199,7 +199,7 @@ describe('app', () => {
 
           return request(app)
             .get(
-              '/api/articles?sort_by=votes&order=asc&username=rogersop&topic=cats'
+              '/api/articles?sort_by=votes&order=asc&author=rogersop&topic=cats'
             )
             .expect(200)
             .then(({ body }) => {
@@ -229,7 +229,7 @@ describe('app', () => {
 
         it('status: 404 - responds with User Not Found when passed a username that does not exist as argument in query', () => {
           return request(app)
-            .get('/api/articles?username=doesnotexist')
+            .get('/api/articles?author=doesnotexist')
             .expect(404)
             .then(({ body }) => {
               expect(body.msg).toBe('User Not Found');
@@ -573,6 +573,16 @@ describe('app', () => {
                 });
             });
 
+            it('status: 200 - responds with empty array when no comments exist for article id', () => {
+              return request(app)
+                .get('/api/articles/2/comments')
+                .expect(200)
+                .then(({ body }) => {
+                  expect(body.comments).toBeInstanceOf(Array);
+                  expect(body.comments).toHaveLength(0);
+                });
+            });
+
             it('status: 400 - responds with Invalid Request Query when passed an invalid query', () => {
               return request(app)
                 .get('/api/articles/1/comments?sort_by=cats')
@@ -653,20 +663,20 @@ describe('app', () => {
             it('status: 400 - responds with Invalid Request Body when passed invalid body', () => {
               return request(app)
                 .post('/api/articles/1/comments')
-                .send({ id: 'lurker', comment: 'I dont like cats' })
+                .send({ username: 'icellusedkars' })
                 .expect(400)
                 .then(({ body }) => {
                   expect(body.msg).toBe('Invalid Request Body');
                 });
             });
 
-            it('status: 404 - responds with Username Not Found when passed an unknown username', () => {
+            it('status: 404 - responds with User Not Found when passed an unknown username', () => {
               return request(app)
                 .post('/api/articles/1/comments')
                 .send({ username: 'dog', body: 'I dont like cats' })
                 .expect(404)
                 .then(({ body }) => {
-                  expect(body.msg).toBe('Username Not Found');
+                  expect(body.msg).toBe('User Not Found');
                 });
             });
 
@@ -886,6 +896,16 @@ describe('app', () => {
               expect(body.topics).toBeSortedBy('slug');
             });
         });
+      });
+
+      it('status: 200 - responds with first optic in alphabetical order', () => {
+        return request(app)
+          .get('/api/topics')
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.topics[0]).toHaveProperty('description', 'Not dogs');
+            expect(body.topics[0]).toHaveProperty('slug', 'cats');
+          });
       });
 
       describe('unsupported methods', () => {

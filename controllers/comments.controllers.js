@@ -4,13 +4,20 @@ const {
   deleteComment,
   updateComment
 } = require('../models/comments.models');
+const { selectArticle } = require('../models/articles.models');
+const { selectUser } = require('../models/users.models');
 
 exports.getComments = (req, res, next) => {
   const { article_id } = req.params;
   const { sort_by = 'created_at', order = 'desc' } = req.query;
 
-  selectComments(article_id, sort_by, order)
-    .then(comments => {
+  const promiseArr = [
+    selectComments(article_id, sort_by, order),
+    selectArticle(article_id)
+  ];
+
+  Promise.all(promiseArr)
+    .then(([comments]) => {
       res.send({ comments });
     })
     .catch(next);
@@ -20,8 +27,14 @@ exports.postComment = (req, res, next) => {
   const { article_id } = req.params;
   const { username, body } = req.body;
 
-  insertComment(article_id, username, body)
-    .then(([comment]) => {
+  const promiseArr = [
+    insertComment(article_id, username, body),
+    selectArticle(article_id),
+    selectUser(username)
+  ];
+
+  Promise.all(promiseArr)
+    .then(([[comment]]) => {
       res.status(201).send({ comment });
     })
     .catch(next);

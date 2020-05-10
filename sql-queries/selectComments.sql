@@ -7,5 +7,5 @@ SELECT
     comments.updated_at
 FROM comments
 JOIN users ON comments.user_id = users.user_id
-WHERE comments.article_id = 1
+WHERE comments.article_id = 2
 ORDER BY comments.created_at DESC;

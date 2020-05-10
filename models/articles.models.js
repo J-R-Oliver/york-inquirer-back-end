@@ -44,27 +44,57 @@ exports.selectArticle = article_id => {
     .join('topics', 'articles.topic_id', '=', 'topics.topic_id')
     .join('users', 'articles.user_id', '=', 'users.user_id')
     .leftJoin('comments', 'articles.article_id', '=', 'comments.article_id')
-    .where('articles.article_id', article_id)
+    .where({ 'articles.article_id': article_id })
     .groupBy('articles.article_id', 'users.username', 'topics.slug')
     .then(article => {
-      if (article.length === 0) {
-        return Promise.reject({ status: 404, msg: 'Article Not Found' });
-      }
-      return article;
+      return article.length === 0
+        ? Promise.reject({ status: 404, msg: 'Article Not Found' })
+        : article;
     });
 };
 
 exports.updateArticle = (article_id, inc_votes) => {
-  return knex('articles')
-    .where('articles.article_id', article_id)
-    .increment('votes', inc_votes)
-    .then(() => {
-      return exports.selectArticle(article_id);
-    })
+  return knex('updated_article')
+    .with(
+      'updated_article',
+      knex('articles')
+        .where({ 'articles.article_id': article_id })
+        .increment('votes', inc_votes)
+        .returning('*')
+    )
+    .select(
+      'users.username AS author',
+      'updated_article.title',
+      'updated_article.article_id',
+      'updated_article.body',
+      'topics.slug AS topic',
+      'updated_article.created_at',
+      'updated_article.updated_at',
+      'updated_article.votes'
+    )
+    .count('comments.comment_id', { as: 'comment_count' })
+    .join('topics', 'updated_article.topic_id', '=', 'topics.topic_id')
+    .join('users', 'updated_article.user_id', '=', 'users.user_id')
+    .leftJoin(
+      'comments',
+      'updated_article.article_id',
+      '=',
+      'comments.article_id'
+    )
+    .groupBy(
+      'updated_article.article_id',
+      'updated_article.title',
+      'updated_article.article_id',
+      'updated_article.body',
+      'updated_article.created_at',
+      'updated_article.updated_at',
+      'updated_article.votes',
+      'users.username',
+      'topics.slug'
+    )
     .then(article => {
-      if (article.length === 0) {
-        return Promise.reject({ status: 404, msg: 'Article Not Found' });
-      }
-      return article;
+      return article.length === 0
+        ? Promise.reject({ status: 404, msg: 'Article Not Found' })
+        : article;
     });
 };

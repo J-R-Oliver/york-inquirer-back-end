@@ -12,8 +12,13 @@
     "migrate-db-latest": "knex migrate:latest",
     "migrate-db-rollback": "knex migrate:rollback",
     "seed-db": "knex seed:run",
+    "production-migrate-db-latest": "NODE_ENV=production DB_URL=$(heroku config:get DATABASE_URL) knex migrate:latest",
+    "production-migrate-db-rollback": "NODE_ENV=production DB_URL=$(heroku config:get DATABASE_URL) knex migrate:rollback",
+    "production-seed-db": "NODE_ENV=production DB_URL=$(heroku config:get DATABASE_URL) knex seed:run",
     "pretest": "eslint .",
-    "test": "jest"
+    "test": "jest",
+    "start-dev": "nodemon listen.js",
+    "start": "node listen.js"
   },
   "husky": {
     "hooks": {
@@ -48,6 +53,7 @@
     "husky": "^4.2.5",
     "jest": "^25.5.4",
     "jest-sorted": "^1.0.6",
+    "nodemon": "^2.0.3",
     "prettier": "^2.0.5",
     "supertest": "^4.0.2"
   },

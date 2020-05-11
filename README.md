@@ -58,13 +58,13 @@ If you find a bug, unexpected behaviour or failed query, please report by creati
 
 ## Testing 
 
-All test have been written using [Jest](https://jestjs.io). To start starting run:
+All test have been written using [Jest](https://jestjs.io). To start testing run:
 
 ```
 npm test
 ```
 
-A pretest script has been written configured to run `eslint` automatically prior to starting Jest. This will highlight any lint errors.
+A pretest script has been written and configured to run `eslint` automatically prior to starting Jest. This will highlight any lint errors.
 
 ### Built With
 
@@ -74,7 +74,8 @@ A pretest script has been written configured to run `eslint` automatically prior
 
 ### To-do
 
-[] Add link to hosted app\
+[] Add linting guidelines to testing section\
+[] Add link to hosted app and explain production scripts\
 [] Add badges to README.ms\
 [] Paginate articles and comments\
 [] Test created_at and updated_at implementation using Moment.js\

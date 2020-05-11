@@ -21,17 +21,45 @@ describe('app', () => {
   });
 
   describe('/api', () => {
+    describe('GET', () => {
+      it('status: 200 - responds with endpoint information object', () => {
+        return request(app)
+          .get('/api')
+          .expect(200)
+          .then(({ body }) => {
+            expect(body['GET /api']).toHaveProperty(
+              'description',
+              'serves a json representation of all available endpoints'
+            );
+          });
+      });
+
+      it('status: 200 - responds with information detailing endpoint URL, description, queries and example response', () => {
+        return request(app)
+          .get('/api')
+          .expect(200)
+          .then(({ body }) => {
+            expect(body['GET /api/articles']).toHaveProperty(
+              'description',
+              'serves an array of all articles'
+            );
+            expect(body['GET /api/articles']).toHaveProperty('queries', [
+              'author',
+              'order',
+              'sort_by',
+              'topic'
+            ]);
+            expect(body['GET /api/articles']).toHaveProperty([
+              'exampleResponse',
+              'articles'
+            ]);
+          });
+      });
+    });
+
     describe('unsupported methods', () => {
       it('status: 405 - responds with Method Not Allowed', () => {
-        const methods = [
-          'get',
-          'post',
-          'put',
-          'delete',
-          'options',
-          'trace',
-          'patch'
-        ];
+        const methods = ['post', 'put', 'delete', 'options', 'trace', 'patch'];
 
         const requestPromises = methods.map(method => {
           return request(app)

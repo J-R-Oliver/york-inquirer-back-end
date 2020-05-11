@@ -81,6 +81,6 @@ A pretest script has been written configured to run `eslint` automatically prior
 
 ### Developers 
 
-[![James Oliver](https://avatars0.githubusercontent.com/u/57285673?s=460&u=f84015efaae37809b255feece51e0516fe750767&v=4 =250x250)](https://github.com/J-R-Oliver)|
+[<img src="https://avatars0.githubusercontent.com/u/57285673?s=460&u=f84015efaae37809b255feece51e0516fe750767&v=4 =250x250" alt="James Oliver" width="250" height="250">](https://github.com/J-R-Oliver)|
 ---|
 [James Oliver](https://github.com/J-R-Oliver)|

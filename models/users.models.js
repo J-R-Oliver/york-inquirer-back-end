@@ -21,9 +21,15 @@ exports.selectUser = username => {
     .select(
       'username',
       'avatar_url',
-      knex.raw("CONCAT(first_name, ' ', last_name) AS name")
+      knex.raw("CONCAT(first_name, ' ', last_name) AS name"),
+      knex.raw(
+        'COALESCE(SUM(articles.votes) + SUM(comments.votes), 0) AS total_votes'
+      )
     )
+    .leftJoin('articles', 'users.user_id', '=', 'articles.user_id')
+    .leftJoin('comments', 'users.user_id', '=', 'comments.user_id')
     .where({ username })
+    .groupBy('users.user_id')
     .then(user => {
       return user.length === 0
         ? Promise.reject({ status: 404, msg: 'User Not Found' })

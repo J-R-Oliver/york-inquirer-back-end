@@ -1421,6 +1421,15 @@ describe('app', () => {
               });
           });
 
+          it('status: 200 - responds with total_votes for user', () => {
+            return request(app)
+              .get('/api/users/butter_bridge')
+              .expect(200)
+              .then(({ body }) => {
+                expect(body.user).toHaveProperty('total_votes', '644');
+              });
+          });
+
           it('status: 200 - responds with user object with username of rogersop', () => {
             return request(app)
               .get('/api/users/rogersop')
@@ -1432,6 +1441,7 @@ describe('app', () => {
                   'https://avatars2.githubusercontent.com/u/24394918?s=400&v=4'
                 );
                 expect(body.user).toHaveProperty('name', 'paul paulson');
+                expect(body.user).toHaveProperty('total_votes', '0');
               });
           });
 

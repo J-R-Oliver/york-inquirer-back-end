@@ -78,7 +78,7 @@ A pretest script has been written and configured to run `eslint` automatically p
 [] Add link to hosted app and explain production scripts\
 [] Add badges to README.ms\
 [] Paginate articles and comments\
-[] Test created_at and updated_at implementation using Moment.js\
+[] Test created_at and updated_at implementation using Moment.js
 
 ### Developers 
 

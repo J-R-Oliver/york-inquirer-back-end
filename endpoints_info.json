@@ -6,6 +6,9 @@
     "description": "serves an array of all articles",
     "queries": ["author", "order", "sort_by","topic"],
     "exampleResponse": {
+      "total_count": "12",
+      "total_pages": "3",
+      "current_page": "1",
       "articles": [
         {
           "title": "Cats and catnapping",

@@ -1,6 +1,29 @@
 const knex = require('../db/connection');
 
-exports.selectArticles = (sort_by, order, username, slug) => {
+exports.selectArticleCount = (username, slug) => {
+  return knex
+    .count('*', { as: 'total_count' })
+    .from(function select_articles() {
+      this.select('articles.article_id')
+        .from('articles')
+        .join('topics', 'articles.topic_id', '=', 'topics.topic_id')
+        .join('users', 'articles.user_id', '=', 'users.user_id')
+        .leftJoin('comments', 'articles.article_id', '=', 'comments.article_id')
+        .groupBy('articles.article_id', 'users.username', 'topics.slug')
+        .as('select_articles')
+        .modify(query => {
+          if (username && slug) {
+            query.where({ username, slug });
+          } else if (username) {
+            query.where({ username });
+          } else if (slug) {
+            query.where({ slug });
+          }
+        });
+    });
+};
+
+exports.selectArticles = (sort_by, order, username, slug, limit, page) => {
   return knex('articles')
     .select(
       'users.username AS author',
@@ -17,6 +40,8 @@ exports.selectArticles = (sort_by, order, username, slug) => {
     .leftJoin('comments', 'articles.article_id', '=', 'comments.article_id')
     .groupBy('articles.article_id', 'users.username', 'topics.slug')
     .orderBy(sort_by, order)
+    .limit(limit)
+    .offset(limit * (page - 1))
     .modify(query => {
       if (username && slug) {
         query.where({ username, slug });

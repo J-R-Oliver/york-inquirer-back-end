@@ -13,4 +13,5 @@ JOIN users ON articles.user_id = users.user_id
 LEFT JOIN comments ON articles.article_id = comments.article_id
 WHERE topics.slug = 'paper'
 GROUP BY articles.article_id, users.username, topics.slug
-ORDER BY articles.created_at DESC;
+ORDER BY articles.created_at DESC
+LIMIT 10 OFFSET 0;

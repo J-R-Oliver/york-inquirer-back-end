@@ -83,15 +83,6 @@ describe('app', () => {
             });
         });
 
-        it('status: 200 - responds with all articles', () => {
-          return request(app)
-            .get('/api/articles')
-            .expect(200)
-            .then(({ body }) => {
-              expect(body.articles).toHaveLength(12);
-            });
-        });
-
         it('status: 200 - responds with an array of article objects', () => {
           return request(app)
             .get('/api/articles')
@@ -110,6 +101,15 @@ describe('app', () => {
             });
         });
 
+        it('status: 200 - responds with total_count displaying total number of available articles', () => {
+          return request(app)
+            .get('/api/articles')
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.total_count).toBe('12');
+            });
+        });
+
         it('status: 200 - responds with articles sorted by default, created_at and descending', () => {
           return request(app)
             .get('/api/articles')
@@ -118,6 +118,72 @@ describe('app', () => {
               expect(body.articles).toBeSortedBy('created_at', {
                 descending: true
               });
+            });
+        });
+
+        it('status: 200 - responds with oldest article first when sorted by default', () => {
+          const expected = {
+            author: 'butter_bridge',
+            title: 'Living in the shadow of a great man',
+            article_id: 1,
+            topic: 'mitch',
+            created_at: '2018-11-15T12:21:54.171Z',
+            updated_at: '2018-11-15T12:21:54.171Z',
+            votes: 100,
+            comment_count: '13'
+          };
+
+          return request(app)
+            .get('/api/articles')
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.articles[0]).toStrictEqual(expected);
+            });
+        });
+
+        it('status: 200 - responds with articles limited to limit query, defaulting to 10', () => {
+          return request(app)
+            .get('/api/articles')
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.articles).toHaveLength(10);
+            });
+        });
+
+        it('status: 200 - responds with all articles when limit is set to 100', () => {
+          return request(app)
+            .get('/api/articles?limit=100')
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.articles).toHaveLength(12);
+            });
+        });
+
+        it('status: 200 - responds with total_pages displaying total number of pages based on limit size', () => {
+          return request(app)
+            .get('/api/articles?limit=5')
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.total_pages).toBe(3);
+            });
+        });
+
+        it('status: 200 - responds with articles offset by p based on limit', () => {
+          return request(app)
+            .get('/api/articles?limit=5&p=3')
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.articles[0]).toHaveProperty('title', 'Am I a cat?');
+              expect(body.articles[1]).toHaveProperty('title', 'Moustache');
+            });
+        });
+
+        it('status: 200 - responds with current_page displaying current offset', () => {
+          return request(app)
+            .get('/api/articles?limit=5&p=2')
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.current_page).toBe('2');
             });
         });
 
@@ -144,26 +210,6 @@ describe('app', () => {
               body.articles.forEach(article => {
                 expect(article).toHaveProperty('topic');
               });
-            });
-        });
-
-        it('status: 200 - responds with oldest article first when sorted by default', () => {
-          const expected = {
-            author: 'butter_bridge',
-            title: 'Living in the shadow of a great man',
-            article_id: 1,
-            topic: 'mitch',
-            created_at: '2018-11-15T12:21:54.171Z',
-            updated_at: '2018-11-15T12:21:54.171Z',
-            votes: 100,
-            comment_count: '13'
-          };
-
-          return request(app)
-            .get('/api/articles')
-            .expect(200)
-            .then(({ body }) => {
-              expect(body.articles[0]).toStrictEqual(expected);
             });
         });
 
@@ -200,7 +246,7 @@ describe('app', () => {
 
         it('status: 200 - responds with articles whose topic matches topic query', () => {
           return request(app)
-            .get('/api/articles?topic=mitch')
+            .get('/api/articles?topic=mitch&limit=20')
             .expect(200)
             .then(({ body }) => {
               expect(body.articles).toHaveLength(11);
@@ -244,7 +290,7 @@ describe('app', () => {
             });
         });
 
-        it('status: 400 - responds with Invalid Request Query when passed an invalid query argument', () => {
+        it('status: 400 - responds with Invalid Request Query when passed a non-existent column as sort_by argument', () => {
           return request(app)
             .get('/api/articles?sort_by=cats')
             .expect(400)

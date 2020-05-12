@@ -1,4 +1,5 @@
 const {
+  selectArticleCount,
   selectArticles,
   selectArticle,
   insertArticle,
@@ -13,17 +14,27 @@ exports.getArticles = (req, res, next) => {
     sort_by = 'created_at',
     order = 'desc',
     author: username,
-    topic
+    topic,
+    limit = 10,
+    p = 1
   } = req.query;
 
-  const promiseArr = [selectArticles(sort_by, order, username, topic)];
+  const promiseArr = [
+    selectArticleCount(username, topic),
+    selectArticles(sort_by, order, username, topic, limit, p)
+  ];
 
   if (username) promiseArr.push(selectUser(username));
   if (topic) promiseArr.push(selectTopic(topic));
 
   Promise.all(promiseArr)
-    .then(([articles]) => {
-      res.send({ articles });
+    .then(([[{ total_count }], articles]) => {
+      res.send({
+        total_count,
+        total_pages: Math.ceil(total_count / limit),
+        current_page: p,
+        articles
+      });
     })
     .catch(next);
 };

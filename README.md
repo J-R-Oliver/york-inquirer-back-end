@@ -2,6 +2,8 @@
 
 The York Inquirer is a news website, that allows an aggregation of articles, article and comment ratings, and user-discussion. Users submit articles and comments to the site which are then voted up or down by the community.
 
+![Heroku](https://github.com/J-R-Oliver/the-york-inquirer/workflows/Heroku/badge.svg)
+
 ## Getting Started
 
 If you wish to contribute to the project please follow the following instructions to setup a development environment on your local machine.
@@ -66,20 +68,20 @@ npm test
 
 A pretest script has been written and configured to run `eslint` automatically prior to starting Jest. This will highlight any lint errors.
 
-### Built With
+## Built With
 
 * [Express](http://expressjs.com) - a fast, unopinionated, minimalist web framework for Node.js.
 * [Knex.js](http://knexjs.org) - a SQL query builder for various database engines including Postgres.
 * [Node-Postgres](https://node-postgres.com) - a collection of node.js modules for interfacing with PostgreSQL databases. 
 
-### To-do
+## To-do
 
 [] Add linting guidelines to testing section\
 [] Add link to hosted app and explain production scripts\
 [] Add badges to README.ms\
 [] Test created_at and updated_at implementation using Moment.js
 
-### Developers 
+## Developers 
 
 [<img src="https://avatars0.githubusercontent.com/u/57285673?s=460&u=f84015efaae37809b255feece51e0516fe750767&v=4 =250x250" alt="James Oliver" width="250" height="250">](https://github.com/J-R-Oliver)|
 ---|

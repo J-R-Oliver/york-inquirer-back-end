@@ -4,7 +4,7 @@
   },
   "GET /api/articles": {
     "description": "serves an array of all articles",
-    "queries": ["author", "order", "sort_by","topic"],
+    "queries": ["author", "order", "sort_by","topic", "limit", "p"],
     "exampleResponse": {
       "total_count": "12",
       "total_pages": "3",
@@ -90,7 +90,7 @@
   "GET /api/articles/:article_id/comments": {
     "description": "servers an array of comments",
     "parameter": "article_id for article resource, must be an integer",
-    "queries": ["order", "sort_by"],
+    "queries": ["order", "sort_by", "limit", "p"],
     "exampleResponse": {
       "comments": [
         {

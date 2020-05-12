@@ -45,7 +45,9 @@ describe('app', () => {
               'author',
               'order',
               'sort_by',
-              'topic'
+              'topic',
+              'limit',
+              'p'
             ]);
             expect(body['GET /api/articles']).toHaveProperty([
               'exampleResponse',
@@ -791,15 +793,6 @@ describe('app', () => {
                 });
             });
 
-            it('status: 200 - responds with all comments for article id', () => {
-              return request(app)
-                .get('/api/articles/1/comments')
-                .expect(200)
-                .then(({ body }) => {
-                  expect(body.comments).toHaveLength(13);
-                });
-            });
-
             it('status: 200 - responds with an array of comment objects', () => {
               return request(app)
                 .get('/api/articles/1/comments')
@@ -843,6 +836,44 @@ describe('app', () => {
                 .expect(200)
                 .then(({ body }) => {
                   expect(body.comments[0]).toStrictEqual(expected);
+                });
+            });
+
+            it('status: 200 - responds with comments limited to limit query, defaulting to 10', () => {
+              return request(app)
+                .get('/api/articles/1/comments')
+                .expect(200)
+                .then(({ body }) => {
+                  expect(body.comments).toHaveLength(10);
+                });
+            });
+
+            it('status: 200 - responds with all comments for article id when limit is set to 100', () => {
+              return request(app)
+                .get('/api/articles/1/comments?limit=100')
+                .expect(200)
+                .then(({ body }) => {
+                  expect(body.comments).toHaveLength(13);
+                });
+            });
+
+            it('status: 200 - responds with articles offset by p based on limit', () => {
+              return request(app)
+                .get('/api/articles/1/comments?limit=5&p=3')
+                .expect(200)
+                .then(({ body }) => {
+                  expect(body.comments[0]).toHaveProperty(
+                    'body',
+                    'Massive intercranial brain haemorrhage'
+                  );
+                  expect(body.comments[1]).toHaveProperty(
+                    'body',
+                    'Fruit pastilles'
+                  );
+                  expect(body.comments[2]).toHaveProperty(
+                    'body',
+                    'This morning, I showered for nine minutes.'
+                  );
                 });
             });
 

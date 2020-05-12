@@ -1,6 +1,6 @@
 const knex = require('../db/connection');
 
-exports.selectComments = (article_id, sort_by, order) => {
+exports.selectComments = (article_id, sort_by, order, limit, page) => {
   return knex('comments')
     .select(
       'comments.comment_id',
@@ -12,7 +12,9 @@ exports.selectComments = (article_id, sort_by, order) => {
     )
     .join('users', 'comments.user_id', '=', 'users.user_id')
     .where({ article_id })
-    .orderBy(sort_by, order);
+    .orderBy(sort_by, order)
+    .limit(limit)
+    .offset(limit * (page - 1));
 };
 
 exports.insertComment = (article_id, username, body) => {

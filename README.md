@@ -1,6 +1,6 @@
 # York Inquirer Back-End
 
-![Heroku](https://github.com/J-R-Oliver/the-york-inquirer/workflows/Heroku/badge.svg)
+![Heroku](https://github.com/J-R-Oliver/york-inquirer-back-end/workflows/Heroku/badge.svg)
 
 <table>
 <tr>

@@ -5,7 +5,7 @@
     "node": ">=12.0.0"
   },
   "description": "A newspaper website allowing for user comments.",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "create-db": "psql -f ./db/setup.sql",
     "create-db-migration": "knex migrate:make",
@@ -31,7 +31,7 @@
     "url": "git+https://github.com/J-R-Oliver/the-york-inquirer.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "James Oliver",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/J-R-Oliver/the-york-inquirer/issues"
@@ -58,6 +58,7 @@
     "supertest": "^4.0.2"
   },
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "knex": "^0.21.1",
     "pg": "^8.0.3"

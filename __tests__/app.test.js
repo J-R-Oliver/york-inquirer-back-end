@@ -59,7 +59,7 @@ describe('app', () => {
 
     describe('unsupported methods', () => {
       it('status: 405 - responds with Method Not Allowed', () => {
-        const methods = ['post', 'put', 'delete', 'options', 'trace', 'patch'];
+        const methods = ['post', 'put', 'delete', 'patch'];
 
         const requestPromises = methods.map(method => {
           return request(app)
@@ -508,7 +508,7 @@ describe('app', () => {
 
       describe('unsupported methods', () => {
         it('status: 405 - responds with Method Not Allowed', () => {
-          const methods = ['put', 'delete', 'options', 'trace', 'patch'];
+          const methods = ['put', 'delete', 'patch'];
 
           const requestPromises = methods.map(method => {
             return request(app)
@@ -767,7 +767,7 @@ describe('app', () => {
 
         describe('unsupported methods', () => {
           it('status: 405 - responds with Method Not Allowed', () => {
-            const methods = ['post', 'put', 'options', 'trace'];
+            const methods = ['post', 'put'];
 
             const requestPromises = methods.map(method => {
               return request(app)
@@ -1025,7 +1025,7 @@ describe('app', () => {
 
           describe('unsupported methods', () => {
             it('status: 405 - responds with Method Not Allowed', () => {
-              const methods = ['put', 'delete', 'options', 'trace', 'patch'];
+              const methods = ['put', 'delete', 'patch'];
 
               const requestPromises = methods.map(method => {
                 return request(app)
@@ -1172,7 +1172,7 @@ describe('app', () => {
 
         describe('unsupported methods', () => {
           it('status: 405 - responds with Method Not Allowed', () => {
-            const methods = ['get', 'post', 'put', 'options', 'trace'];
+            const methods = ['get', 'post', 'put'];
 
             const requestPromises = methods.map(method => {
               return request(app)
@@ -1288,7 +1288,7 @@ describe('app', () => {
 
       describe('unsupported methods', () => {
         it('status: 405 - responds with Method Not Allowed', () => {
-          const methods = ['put', 'delete', 'options', 'trace', 'patch'];
+          const methods = ['put', 'delete', 'patch'];
 
           const requestPromises = methods.map(method => {
             return request(app)
@@ -1460,7 +1460,7 @@ describe('app', () => {
 
       describe('unsupported methods', () => {
         it('status: 405 - responds with Method Not Allowed', () => {
-          const methods = ['put', 'delete', 'options', 'trace', 'patch'];
+          const methods = ['put', 'delete', 'patch'];
 
           const requestPromises = methods.map(method => {
             return request(app)
@@ -1532,14 +1532,7 @@ describe('app', () => {
 
         describe('unsupported methods', () => {
           it('status: 405 - responds with Method Not Allowed', () => {
-            const methods = [
-              'post',
-              'put',
-              'delete',
-              'options',
-              'trace',
-              'patch'
-            ];
+            const methods = ['post', 'put', 'delete', 'patch'];
 
             const requestPromises = methods.map(method => {
               return request(app)

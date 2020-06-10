@@ -61,10 +61,12 @@ npm start
 
 This project reads the following environment variables:
 
-- DB_URL (In production this is a connection string)
+- DATABASE_URL (Provided by Heroku in the production environment)
+- DB_URL
 - DB_USER
 - DB_PASSWORD
 - NODE_ENV
+- PORT
 
 Please provide the necessary connection details for your Postgres instance.
 

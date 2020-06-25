@@ -1,9 +1,5 @@
-const {
-  promises: { readFile }
-} = require('fs');
+const endpointsInfo = require('../endpoints_info.json');
 
 exports.readEndpointInfo = () => {
-  return readFile('endpoints_info.json', 'utf-8').then(endpointInfoString => {
-    return JSON.parse(endpointInfoString);
-  });
+  return endpointsInfo;
 };

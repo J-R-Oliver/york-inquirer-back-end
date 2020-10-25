@@ -2,9 +2,8 @@ name: Heroku
 
 on:
   push:
-    branches: [master]
-  pull_request:
-    branches: [master]
+    branches:
+      - master
 
 jobs:
   test:
@@ -29,8 +28,8 @@ jobs:
         with:
           postgresql version: 12
           postgresql db: york_inquirer_test
-          postgresql user: test
-          postgresql password: test
+          postgresql user: postgres
+          postgresql password: secret
 
       - name: Install dependencies
         run: npm ci
@@ -38,8 +37,8 @@ jobs:
       - name: Run tests
         run: npm test
         env:
-          DB_USER: 'test'
-          DB_PASSWORD: 'test'
+          DB_USER: 'postgres'
+          DB_PASSWORD: 'secret'
 
   deploy:
     name: Deploy
@@ -49,11 +48,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-        with:
-          fetch-depth: '0'
-
-      - name: Add heroku remote
-        run: git remote add heroku https://heroku:${{ secrets.HEROKU_API_KEY }}@git.heroku.com/${{ secrets.HEROKU_APP_NAME }}.git
 
       - name: Deploy to Heroku
-        run: git push heroku master --force
+        uses: akhileshns/heroku-deploy@v3.6.8
+        with:
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
+          heroku_email: ${{ secrets.HEROKU_EMAIL }}
+          usedocker: true

@@ -4,7 +4,7 @@
 # Add files or folders starting with !
 !controllers
 !db/connection.js
-!models/*
+!models
 !routes
 !app.js
 !endpoints_info.json

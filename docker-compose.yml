@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  db:
+    image: postgres
+    container_name: york-inquirer-postgres
+    restart: unless-stopped
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./db/setup.sql:/docker-entrypoint-initdb.d/setup.sql

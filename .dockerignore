@@ -1,0 +1,12 @@
+# Default ignore everything
+*
+
+# Add files or folders starting with !
+!controllers
+!db/connection.js
+!models/*
+!routes
+!app.js
+!endpoints_info.json
+!listen.js
+!package*.json

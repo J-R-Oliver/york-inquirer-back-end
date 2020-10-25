@@ -1,5 +1,12 @@
 {
-  "extends": ["airbnb", "prettier", "plugin:jest/recommended", "plugin:jest-formatting/recommended", "plugin:node/recommended", "plugin:security/recommended"],
+  "extends": [
+    "eslint-config-airbnb-base",
+    "prettier",
+    "plugin:jest/recommended",
+    "plugin:jest-formatting/recommended",
+    "plugin:node/recommended",
+    "plugin:security/recommended"
+  ],
   "plugins": ["prettier", "jest", "jest-formatting", "node", "security"],
   "rules": {
     "prettier/prettier": ["error"],

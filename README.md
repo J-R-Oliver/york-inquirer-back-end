@@ -32,26 +32,43 @@ If you wish to contribute to the project please follow the following instruction
 To install this project you will need to have:
 
 - [Node.js](https://nodejs.org)
-- [PostgreSQL](https://www.postgresql.org)
+- [Docker](https://www.docker.com)
 
 Tested on `Node.js v12/v13/v14` and `PostgreSQL v12`.
 
 ### Installation
 
-To start, please `fork` and `clone` the repository to your local machine. First you will need to install the dependencies.
+To start, please `fork` and `clone` the repository to your local machine. First you will need to create a `.env` file to store the environment variables.
+
+```
+touch .env \
+&& echo \
+'NODE_ENV=development
+DATABASE_URL=localhost
+DB_USER=postgres
+DB_PASSWORD=secret' \
+>> .env
+```
+
+Next you will need to install the dependencies.
 
 ```
 npm install
 ```
 
-You can then create, and seed the databases. This will create two databases, `york_inquirer` and `york_inquirer_test`, for testing and development purposes. The `seed-db` script will update the databases with all the schema changes defined in the migration files.
+To start the database execute the `docker-compose` file. This will start _PostgreSQL_ in a container and create both _development_ and _test_ databases.
 
 ```
-npm run create-db
+docker-compose up -d
+```
+
+To seed the _development_ database.
+
+```
 npm run seed-db
 ```
 
-The following command will start the server listening on the port defined in your .ENV file, details [below](###-Configuration).
+The following command will start the server listening on the port defined in your `.env` file, details [below](###-Configuration).
 
 ```
 npm start
@@ -61,14 +78,13 @@ npm start
 
 This project reads the following environment variables:
 
-- DATABASE_URL (Provided by Heroku in the production environment)
-- DB_URL
+- NODE_ENV
+- DATABASE_URL
 - DB_USER
 - DB_PASSWORD
-- NODE_ENV
-- PORT
+- PORT (A default value of `9090` has been provided)
 
-Please provide the necessary connection details for your Postgres instance.
+Please provide the necessary connection details for your _PostgreSQL_ instance.
 
 ## Contributing
 
@@ -114,6 +130,20 @@ This project is being linted with `eslint` configured with the following rule se
 - [Express](http://expressjs.com) - a fast, unopinionated, minimalist web framework for Node.js.
 - [Knex.js](http://knexjs.org) - a SQL query builder for various database engines including Postgres.
 - [Node-Postgres](https://node-postgres.com) - a collection of node.js modules for interfacing with PostgreSQL databases.
+
+## Docker
+
+A `Dockerfile` has been provided and a Docker image can be created with the following command.
+
+```
+docker build -t york-inquirer-back-end .
+```
+
+You can then create a container from the image and start the server with Docker.
+
+```
+docker run -d --name york-inquirer-back-end -p9090:9090 --env-file .env york-inquirer-back-end
+```
 
 ## Developers
 

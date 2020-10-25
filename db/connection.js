@@ -1,4 +1,6 @@
-const { NODE_ENV = 'development', DATABASE_URL } = process.env;
+const { NODE_ENV, DATABASE_URL } = process.env;
+// eslint-disable-next-line import/no-extraneous-dependencies
+require('dotenv').config();
 
 const dbConfig =
   NODE_ENV === 'production'

@@ -1,6 +1,7 @@
-const { DATABASE_URL, DB_USER, DB_PASSWORD, NODE_ENV } = process.env;
 // eslint-disable-next-line import/no-extraneous-dependencies
 require('dotenv').config();
+
+const { DATABASE_URL, DB_USER, DB_PASSWORD, NODE_ENV } = process.env;
 
 const baseConfig = {
   client: 'pg',

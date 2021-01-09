@@ -38,53 +38,29 @@ Tested on `Node.js v12/v13/v14` and `PostgreSQL v12`.
 
 ### Installation
 
-To start, please `fork` and `clone` the repository to your local machine. First you will need to create a `.env` file to store the environment variables.
-
-```
-touch .env \
-&& echo \
-'NODE_ENV=development
-DATABASE_URL=localhost
-DB_USER=postgres
-DB_PASSWORD=secret' \
->> .env
-```
-
-Next you will need to install the dependencies.
+To start, please `fork` and `clone` the repository to your local machine. Next you will need to install the dependencies.
 
 ```
 npm install
 ```
 
-To start the database execute the `docker-compose` file. This will start _PostgreSQL_ in a container and create both _development_ and _test_ databases.
+To start the database execute the `start-db` command. This will start _PostgreSQL_ in a container and create both _development_ and _test_ databases.
 
 ```
-docker-compose up -d
+npm run start-db
 ```
 
 To seed the _development_ database.
 
 ```
-npm run seed-db
+npm run migrate-db-latest && npm run seed-db
 ```
 
-The following command will start the server listening on the port defined in your `.env` file, details [below](###-Configuration).
+The following command will start the server in development mode listening on the default port of 9090. Whenever a change is made the server will restart.
 
 ```
-npm start
+npm run start-dev
 ```
-
-### Configuration
-
-This project reads the following environment variables:
-
-- NODE_ENV
-- DATABASE_URL
-- DB_USER
-- DB_PASSWORD
-- PORT (A default value of `9090` has been provided)
-
-Please provide the necessary connection details for your _PostgreSQL_ instance.
 
 ## Contributing
 
@@ -139,10 +115,10 @@ A `Dockerfile` has been provided and a Docker image can be created with the foll
 docker build -t york-inquirer-back-end .
 ```
 
-You can then create a container from the image and start the server with Docker.
+The following command will start both the _Node_ and _PostgreSQL_ containers, and build the _Node_ image if `docker build` hasn't been previously run.
 
 ```
-docker run -d --name york-inquirer-back-end -p9090:9090 --env-file .env york-inquirer-back-end
+npm run start-dev-docker
 ```
 
 ## Developers

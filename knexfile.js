@@ -1,7 +1,4 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
-require('dotenv').config();
-
-const { DATABASE_URL, DB_USER, DB_PASSWORD, NODE_ENV } = process.env;
+const { DATABASE_URL, NODE_ENV = 'development' } = process.env;
 
 const baseConfig = {
   client: 'pg',
@@ -25,15 +22,15 @@ const customConfig = {
   development: {
     connection: {
       database: 'york_inquirer',
-      user: DB_USER,
-      password: DB_PASSWORD
+      user: 'postgres',
+      password: 'secret'
     }
   },
   test: {
     connection: {
       database: 'york_inquirer_test',
-      user: DB_USER,
-      password: DB_PASSWORD
+      user: 'postgres',
+      password: 'secret'
     }
   }
 };

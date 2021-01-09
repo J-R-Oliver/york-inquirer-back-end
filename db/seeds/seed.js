@@ -1,4 +1,4 @@
-const { topics, users, articles, comments } = require('../data/index.js');
+const { topics, users, articles, comments } = require('../data');
 const {
   formatUsers,
   createRefObj,
